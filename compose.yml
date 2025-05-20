@@ -1,7 +1,7 @@
 services:
-  contacts-api:
-    image: contacts-api
-    container_name: contacts-api
+  contact-api:
+    image: contact-api
+    container_name: contact-api
     build:
       context: . # contexte d'execution du Dockerfile
       dockerfile: src/Contacts.Api/Dockerfile # chemin du Dockerfile
@@ -9,5 +9,19 @@ services:
       - 80:8080
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDB=mongodb://contact-db:27017
     volumes:
       - ./src/Contacts.Api/contacts.json:/app/contacts.json
+    depends_on:
+      - contact-db
+
+  contact-db:
+    image: mongo:latest
+    container_name: contact-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodbdata:/data/db
+
+volumes:
+  mongodbdata:

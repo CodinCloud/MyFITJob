@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-var contactRepository = new ContactRepository("mongodb://localhost:27017");
+var contactRepository = new ContactRepository(builder.Configuration.GetConnectionString("MongoDB"));
 
 var app = builder.Build();
 
