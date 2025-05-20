@@ -1,0 +1,37 @@
+### Get all contacts
+GET http://localhost:5232/api/contacts
+Accept: application/json
+
+### Get one contact
+GET http://localhost:5232/api/contacts/c1a0cfe4-2c38-4b8d-8d9c-4a93c7f8ad1e
+Accept: application/json
+
+### Create a Contact
+POST http://localhost:5232/api/contacts
+Content-Type: application/json
+Accept: application/json
+
+{
+    "firstName": "John",
+    "lastName": "Doe",
+    "email": "john.doe@example.com",
+    "phone": "0123456789",
+    "address": "123 Main Street"
+}
+
+### Update a Contact
+PUT http://localhost:5232/api/contacts/c1a0cfe4-2c38-4b8d-8d9c-4a93c7f8ad1e
+Content-Type: application/json
+Accept: application/json
+
+{
+    "firstName": "John",
+    "lastName": "Doe Updated",
+    "email": "john.doe.updated@example.com",
+    "phone": "0987654321",
+    "address": "456 New Street"
+}
+
+### Delete a Contact
+DELETE http://localhost:5232/api/contacts/c1a0cfe4-2c38-4b8d-8d9c-4a93c7f8ad1e
+Accept: application/json
