@@ -74,6 +74,7 @@ public class ContactRepository
     }
 }
 ```
+
 - Installer l'extension VSCode [MongoDB](https://marketplace.visualstudio.com/items/?itemName=mongodb.mongodb-vscode)
 - Mettre à jour le Controller pour qu'il utilise les nouvelles méthodes async/await 
 - Lancer l'application  
