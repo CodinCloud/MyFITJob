@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-var contactRepository = new ContactRepository("contacts.json");
+var contactRepository = new ContactRepository("mongodb://localhost:27017");
 
 var app = builder.Build();
 
@@ -23,44 +23,45 @@ app.UseHttpsRedirection();
 // Endpoint pour récupérer tous les contacts
 var routes = app.MapGroup("/api");
 
-routes.MapGet("/contacts", () => contactRepository.GetAll())
-    .WithName("GetContacts")
-    .WithOpenApi();
+routes.MapGet("/contacts", async ()
+    => (await contactRepository.GetAllAsync())
+        .Select(contact => contact.AsDto()))
+            .WithName("GetContacts")
+            .WithOpenApi();
 
 // Endpoint pour récupérer un contact par son ID
-routes.MapGet("/contacts/{id}", (Guid id) => 
+routes.MapGet("/contacts/{id}", async (Guid id) =>
 {
-    var contact = contactRepository.Get(id);
+    var contact = await contactRepository.GetAsync(id);
     return contact is null ? Results.NotFound() : Results.Ok(contact);
 })
 .WithName("GetContactById")
 .WithOpenApi();
 
-routes.MapPost("/contacts", ([FromBody] ContactDto contact) => 
+routes.MapPost("/contacts", async ([FromBody] CreateContactDto contact) =>
 {
     // TODO validation
-
-    var addingContact = new Contact(contact.Id, contact.FirstName, contact.LastName, contact.Email, contact.Phone, contact.Address);
-    var newContact = contactRepository.Create(addingContact);
+    var addingContact = new Contact(Guid.NewGuid(), contact.FirstName, contact.LastName, contact.Email, contact.Phone, contact.Address);
+    var newContact = await contactRepository.CreateAsync(addingContact);
     return Results.Created($"/contacts/{newContact.Id}", newContact);
 })
 .WithName("PostContact")
 .WithOpenApi();
 
-routes.MapPut("/contacts/{id}", (Guid id, [FromBody] ContactDto contact) => 
+routes.MapPut("/contacts/{id}", async (Guid id, [FromBody] UpdateContactDto contact) =>
 {
     // TODO validation
-    var updating = new Contact(contact.Id, contact.FirstName, contact.LastName, contact.Email, contact.Phone, contact.Address);
-    var updatedContact = contactRepository.Update(id, updating);
+    var updating = new Contact(id, contact.FirstName, contact.LastName, contact.Email, contact.Phone, contact.Address);
+    var updatedContact = await contactRepository.UpdateAsync(id, updating);
 
     return Results.NoContent();
 })
 .WithName("PutContact")
 .WithOpenApi();
 
-routes.MapDelete("/contacts/{id}", (Guid id) => 
+routes.MapDelete("/contacts/{id}", async (Guid id) =>
 {
-    contactRepository.Delete(id); 
+    await contactRepository.DeleteAsync(id);
     return Results.NoContent();
 })
 .WithName("DeleteContact")

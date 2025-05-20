@@ -2,8 +2,18 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Contacts.Api.Models;
 
-public class ContactDto
+public record ContactDto
 {
+    public ContactDto(Guid id, string firstName, string lastName, string email, string phone, string address)
+    {
+        Id = id;
+        FirstName = firstName;
+        LastName = lastName;
+        Email = email;
+        Phone = phone;
+        Address = address;
+    }
+
     public Guid Id { get; set; }
 
     [Required(ErrorMessage = "Le prénom est obligatoire")]
@@ -25,4 +35,15 @@ public class ContactDto
     [Required(ErrorMessage = "L'adresse est obligatoire")]
     [StringLength(200, ErrorMessage = "L'adresse ne peut pas dépasser 200 caractères")]
     public string Address { get; set; } = string.Empty;
-} 
+}
+
+public record CreateContactDto(string FirstName, string LastName, string Email, string Phone, string Address);
+public record UpdateContactDto(string FirstName, string LastName, string Email, string Phone, string Address);
+
+public static class ContactExtensions
+{
+    public static ContactDto AsDto(this Contact contact)
+    {
+        return new ContactDto(contact.Id, contact.FirstName, contact.LastName, contact.Email, contact.Phone, contact.Address);
+    }
+}

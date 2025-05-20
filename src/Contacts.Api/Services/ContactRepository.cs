@@ -1,90 +1,62 @@
-using System.Text.Json;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
+using MongoDB.Driver;
 
 namespace Contacts.Api;
 
-public record Contact(Guid Id, string FirstName, string LastName, string Email, string Phone, string Address);
-
 public class ContactRepository
 {
-    private readonly string _filePath;
-    private List<Contact> _contacts;
+    private const string collectionName = "contacts";
+    private readonly IMongoCollection<Contact> _contacts;
+    private readonly FilterDefinitionBuilder<Contact> _filterBuilder = Builders<Contact>.Filter;
 
-    public ContactRepository(string filePath)
+    public ContactRepository(string connectionString)
     {
-        _filePath = Path.Combine(AppContext.BaseDirectory, filePath);
-        LoadContacts();
+        BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+        BsonSerializer.RegisterSerializer(new DateTimeOffsetSerializer(BsonType.String));
+
+        var mongoClient = new MongoClient(connectionString);
+        var database = mongoClient.GetDatabase("Contacts");
+        _contacts = database.GetCollection<Contact>(collectionName);
     }
 
-    private void LoadContacts()
+    public async Task<List<Contact>> GetAllAsync()
     {
-        if (File.Exists(_filePath))
-        {
-            string json = File.ReadAllText(_filePath);
-            _contacts = JsonSerializer.Deserialize<List<Contact>>(json) ?? new List<Contact>();
-        }
-        else
-        {
-            _contacts = new List<Contact>();
-            Console.WriteLine($"Le fichier {_filePath} n'a pas été trouvé.");
-        }
+        return await _contacts.Find(_filterBuilder.Empty)
+            .ToListAsync();
     }
 
-    private void SaveContacts()
+    public Task<Contact> GetAsync(Guid id)
     {
-        string json = JsonSerializer.Serialize(_contacts, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(_filePath, json);
+        FilterDefinition<Contact> filter = _filterBuilder.Eq(entity => entity.Id, id);
+        return _contacts.Find(filter).FirstOrDefaultAsync();
     }
 
-    public IEnumerable<Contact> GetAll()
+    public async Task<Contact> CreateAsync(Contact contact)
     {
-        return _contacts;
-    }
+        if (contact is null)
+            throw new ArgumentNullException(nameof(contact));
 
-    public Contact? Get(Guid id)
-    {
-        return _contacts.FirstOrDefault(c => c.Id == id);
-    }
+        await _contacts.InsertOneAsync(contact);
 
-    public Contact Create(Contact contact)
-    {
-        // Si l'ID est vide, on en génère un nouveau
-        if (contact.Id == Guid.Empty)
-        {
-            contact = contact with { Id = Guid.NewGuid() };
-        }
-
-        // Vérifier si un contact avec cet ID existe déjà
-        var existingContact = _contacts.FirstOrDefault(c => c.Id == contact.Id);
-        if (existingContact != null)
-        {
-            // Remplacer le contact existant
-            _contacts.Remove(existingContact);
-        }
-
-        _contacts.Add(contact);
-        SaveContacts();
         return contact;
     }
 
-    public Contact? Update(Guid id, Contact updatedContact)
+    public async Task<Contact> UpdateAsync(Guid id, Contact updatingEntity)
     {
-        var existingContact = _contacts.FirstOrDefault(c => c.Id == id);
+        if (updatingEntity is null)
+            throw new ArgumentNullException(nameof(updatingEntity));
 
-        var contact = updatedContact with { Id = id };
-        var index = _contacts.IndexOf(existingContact);
-        _contacts[index] = contact;
+        FilterDefinition<Contact> filter = _filterBuilder.Eq(existingEntity => existingEntity.Id, id);
+        await _contacts.ReplaceOneAsync(filter, updatingEntity);
 
-        SaveContacts();
-        return contact;
+        return updatingEntity;
     }
 
-    public void Delete(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        var contact = _contacts.FirstOrDefault(c => c.Id == id);
-        if (contact != null)
-        {
-            _contacts.Remove(contact);
-            SaveContacts();
-        }
+        FilterDefinition<Contact> filter = _filterBuilder.Eq(existingEntity => existingEntity.Id, id);
+        await _contacts.DeleteOneAsync(filter);
     }
 } 
