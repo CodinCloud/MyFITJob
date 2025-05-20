@@ -1,0 +1,13 @@
+services:
+  contacts-api:
+    image: contacts-api
+    container_name: contacts-api
+    build:
+      context: . # contexte d'execution du Dockerfile
+      dockerfile: src/Contacts.Api/Dockerfile # chemin du Dockerfile
+    ports: # mapping du port machine, avec le port dans le container 
+      - 80:8080
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    volumes:
+      - ./src/Contacts.Api/contacts.json:/app/contacts.json
