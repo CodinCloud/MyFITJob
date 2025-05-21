@@ -6,8 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { JobOfferKanban } from '@/features/jobOffers/components/JobOfferKanban'
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { MostSoughtSkillsChart } from '@/features/marketAnalysis'
 
 import logo from '../assets/mjf_logo2.png'
 
@@ -80,35 +79,7 @@ function App() {
               <CardTitle>Top Skills</CardTitle>
             </CardHeader>
             <CardContent className="w-full">
-              <ChartContainer 
-                config={{
-                  count: {
-                    label: "Nombre d'offres",
-                    color: "var(--chart-2)",
-                  }
-                }} 
-                className="w-full"
-              >
-                <BarChart
-                  data={[
-                    { name: 'React', count: 12, color: "var(--chart-1)" },
-                    { name: 'TypeScript', count: 10, color: "var(--chart-2)" },
-                    { name: 'Node.js', count: 8, color: "var(--chart-3)" },
-                    { name: 'AWS', count: 7, color: "var(--chart-4)" },
-                    { name: 'Docker', count: 6, color: "var(--chart-5)" },
-                  ]}
-                >
-                  <XAxis
-                        dataKey="name"
-                        tickLine={false}
-                        tickMargin={10}
-                        axisLine={false}
-                      />
-                  <CartesianGrid vertical={false} />
-                  <Bar dataKey="count" fill="var(--chart-1)" radius={[0, 4, 4, 0]} barSize={20} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </BarChart>
-              </ChartContainer>
+              <MostSoughtSkillsChart />
             </CardContent>
           </Card>
         </section>
