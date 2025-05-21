@@ -54,6 +54,14 @@ function App() {
         </header>
         {/* Stats */}
         <section className="px-10 py-6 grid grid-cols-4 gap-6 bg-muted">
+          <Card className="col-span-1 flex flex-col items-center justify-center">
+            <CardHeader>
+              <CardTitle>Top Skills</CardTitle>
+            </CardHeader>
+            <CardContent className="w-full">
+              <MostSoughtSkillsChart />
+            </CardContent>
+          </Card>
           <Card className="col-span-1">
             <CardHeader>
               <CardTitle>Nouvelles offres</CardTitle>
@@ -72,14 +80,6 @@ function App() {
             <CardContent className="flex flex-col items-center justify-center">
               <div className="text-3xl font-bold">53</div>
               <div className="text-muted-foreground">Tâches en cours</div>
-            </CardContent>
-          </Card>
-          <Card className="col-span-1 flex flex-col items-center justify-center">
-            <CardHeader>
-              <CardTitle>Top Skills</CardTitle>
-            </CardHeader>
-            <CardContent className="w-full">
-              <MostSoughtSkillsChart />
             </CardContent>
           </Card>
         </section>

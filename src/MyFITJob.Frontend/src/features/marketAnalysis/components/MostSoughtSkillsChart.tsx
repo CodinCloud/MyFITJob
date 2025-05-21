@@ -14,7 +14,7 @@ export function MostSoughtSkillsChart() {
       config={{
         count: {
           label: "Nombre d'offres",
-          color: "var(--chart-2)",
+          color: "var(--chart-1)",
         },
       }}
       className="w-full"
@@ -22,15 +22,17 @@ export function MostSoughtSkillsChart() {
       <BarChart
         data={data}
       >
+        <CartesianGrid vertical={false} />
+        <ChartTooltip content={<ChartTooltipContent color="var(--chart-2)" />} />
         <XAxis
           dataKey="name"
           tickLine={false}
           tickMargin={10}
           axisLine={false}
         />
-        <CartesianGrid vertical={false} />
-        <Bar dataKey="count" fill="var(--chart-1)" radius={[0, 4, 4, 0]} barSize={20} />
-        <ChartTooltip content={<ChartTooltipContent />} />
+        <Bar dataKey="count" fill="var(--chart-1)" radius={[0, 4, 4, 0]} barSize={20} 
+          activeBar={{ fill: "var(--chart-1)", stroke: "none", filter: "none" }}
+        />
       </BarChart>
     </ChartContainer>
   );

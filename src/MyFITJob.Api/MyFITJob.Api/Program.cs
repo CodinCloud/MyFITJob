@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MyFITJob.Api.Models;
 using MyFITJob.BusinessLogic;
+using MyFITJob.BusinessLogic.Services;
 using MyFITJob.DAL;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddDbContext<MyFITJobContext>(options =>
 builder.Services.AddScoped<MyFITJobContextInitializer>();
 builder.Services.AddScoped<IJobOfferService, JobOfferService>();
 builder.Services.AddScoped<IJobOfferRepository, JobOfferRepository>();
+builder.Services.AddScoped<ISkillExtractorService, SkillExtractorService>();
 
 builder.Services.AddCors((options) =>
 {

@@ -1,11 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
-import type { MostSoughtSkill } from '../marketAnalysisTypes';
+import type { MostSoughtSkill, Skill } from '../marketAnalysisTypes';
 
 export const marketAnalysisApi = {
   fetchMostSoughtSkills: async (): Promise<MostSoughtSkill[]> => {
-    const res = await fetch('/api/analytics/skills');
+    const res = await fetch('http://localhost:8081/api/market/skills?top=5');
     if (!res.ok) throw new Error('Erreur lors du chargement des skills');
-    return res.json();
+    const skills: Skill[] = await res.json();
+    // Mapping pour le chart
+    return skills.map(({ skill, count }) => ({ name: skill, count }));
   },
 };
 
