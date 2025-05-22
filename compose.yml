@@ -1,27 +1,48 @@
 services:
-  contact-api:
-    image: contact-api
-    container_name: contact-api
+  db:
+    image: postgres:17.2
+    container_name: myfitjob-db
+    restart: always
+    environment:
+      POSTGRES_USER: myfitjob
+      POSTGRES_PASSWORD: myfitjobpass
+      POSTGRES_DB: myfitjobdb
+      # setting these means when you exec in psql, you don't need to specify the db name
+      PGDATABASE: myfitjobdb
+      PGUSER: myfitjob
+      PGPASSWORD: myfitjobpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
     build:
-      context: . # contexte d'execution du Dockerfile
-      dockerfile: src/Contacts.Api/Dockerfile # chemin du Dockerfile
-    ports: # mapping du port machine, avec le port dans le container 
-      - 80:8080
+      context: ./src/MyFITJob.Api
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "8081:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__MongoDB=mongodb://contact-db:27017
-    volumes:
-      - ./src/Contacts.Api/contacts.json:/app/contacts.json
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
     depends_on:
-      - contact-db
+      - db
 
-  contact-db:
-    image: mongo:latest
-    container_name: contact-db
-    ports:
-      - "27017:27017"
+  frontend:
+    build:
+      context: src/MyFITJob.Frontend
+      dockerfile: Dockerfile
+      target: dev
     volumes:
-      - mongodbdata:/data/db
+      - ./src/MyFITJob.Frontend:/app:cached
+      - /app/node_modules  # pour isoler les dépendances
+    working_dir: /app
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"  # Port de Vite en dev      # ou tout port sur lequel Vite écoute
 
 volumes:
-  mongodbdata:
+  postgres_data:

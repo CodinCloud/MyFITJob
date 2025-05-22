@@ -1,0 +1,50 @@
+import React from 'react';
+import { KanbanColumn } from '@/components/KanbanColumn';
+import { useJobOffers } from '../api/jobOfferQueries';
+import { JobOfferStatus } from '../jobOffersTypes';
+import type { JobOffer } from '../jobOffersTypes';
+
+export const JobOfferKanban: React.FC = () => {
+  const { data: jobOffersResult, isLoading, error } = useJobOffers();
+
+  if (isLoading) {
+    return <div>Chargement...</div>;
+  }
+
+  if (error) {
+    return <div>Erreur lors du chargement des offres d'emploi</div>;
+  }
+
+  const jobOffers =  (jobOffersResult?.isSuccess) ? jobOffersResult.value : [];
+
+  // Grouper les offres par statut
+  const offersByStatus = Object.values(JobOfferStatus).reduce((acc, status) => {
+    acc[status] = jobOffers.filter((offer: JobOffer) => offer.status === status);
+    return acc;
+  }, {} as Record<JobOfferStatus, JobOffer[]>);
+
+  // Filtrer les offres archivées
+  const filteredOffersByStatus = Object.fromEntries(
+    Object.entries(offersByStatus).filter(([status]) => status !== JobOfferStatus.Archived)
+  );
+
+  return (
+    <div className="flex gap-6">
+      {Object.entries(filteredOffersByStatus).map(([status, offers]) => (
+        <KanbanColumn
+          key={status}
+          title={status}
+          count={offers.length}
+          cards={offers.map((offer: JobOffer) => ({
+            id: offer.id,
+            title: offer.title,
+            description: offer.description,
+            company: offer.company,
+            date: new Date(offer.lastInteraction ?? offer.updatedAt).toLocaleDateString(),
+            commentsCount: offer.commentsCount,
+          }))}
+        />
+      ))}
+    </div>
+  );
+}; 

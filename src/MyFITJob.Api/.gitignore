@@ -1,0 +1,77 @@
+## .NET / C#
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Rider / VSCode
+.idea/
+.vscode/
+*.code-workspace
+
+## Build outputs
+*.dll
+*.exe
+*.app
+*.pdb
+*.cache
+*.log
+
+## ASP.NET Core
+appsettings.*.json
+secrets.json
+
+## Entity Framework
+MigrationsSnapshot.cs
+*.db
+*.sqlite
+
+## dotnet tools
+**/.tools/
+
+## Node / Vite
+node_modules/
+dist/
+.vite/
+coverage/
+*.log
+.env
+.env.*
+
+# lock files (optionnel)
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
+
+## Logs & dumps
+*.log
+*.nlog
+*.tlog
+*.dmp
+
+## Docker
+**/.docker/
+docker-compose.override.yml
+*.pid
+
+## PostgreSQL (temp local volumes)
+pgdata/
+*.sql
+*.backup
+
+## Ignore generated database if any
+*.mdf
+*.ldf
+*.bak
+
+## Ignore test results
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+## Others
+*.DS_Store
+Thumbs.db
