@@ -4,5 +4,5 @@ namespace MyFITJob.BusinessLogic;
 
 public interface IJobOfferService
 {
-    Task<List<JobOffer>> GetJobOffersAsync(string filter);
+    Task<IEnumerable<JobOffer>> GetJobOffersAsync(string searchTerm, int? skillId = null);
 }

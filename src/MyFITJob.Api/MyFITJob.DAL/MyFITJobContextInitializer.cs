@@ -21,6 +21,50 @@ public static class DatabaseInitializerExtensions
 
 public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logger, MyFITJobContext context)
 {
+    private static readonly Dictionary<string, (string Description, string[] Skills)> JobTemplates = new()
+    {
+        ["Développeur Full Stack"] = (
+            "Rejoignez notre équipe dynamique pour développer des applications web innovantes.",
+            new[] { "JavaScript", "HTML", "CSS", "React", "Angular", "Node.js", "TypeScript" }
+        ),
+        ["DevOps"] = (
+            "Participez à la mise en place de pipelines CI/CD et à la gestion de l'infrastructure cloud.",
+            new[] { "Docker", "Kubernetes", "Bash", "Python", "CI/CD", "Terraform", "AWS" }
+        ),
+        ["Administrateur Systèmes"] = (
+            "Assurez la maintenance et la supervision des systèmes informatiques de nos clients.",
+            new[] { "Linux", "Windows", "TCP/IP", "Réseaux", "Active Directory", "Powershell" }
+        ),
+        ["Développeur Backend"] = (
+            "Développez des API robustes et évolutives pour nos applications internes.",
+            new[] { "Java", "Node.js", "SQL", "REST", "Microservices", "Spring Boot" }
+        ),
+        ["Ingénieur d'Études"] = (
+            "Participez à la conception et au développement de solutions logicielles sur mesure.",
+            new[] { "UML", "Agile", "Java", "Design Patterns", "Git", "Jira" }
+        ),
+        ["Support Informatique"] = (
+            "Fournissez un support technique de premier niveau aux utilisateurs.",
+            new[] { "Hardware", "Software", "Windows", "Office", "Résolution de problèmes" }
+        ),
+        ["Développeur Mobile"] = (
+            "Contribuez au développement d'applications mobiles innovantes.",
+            new[] { "Swift", "Kotlin", "React Native", "Flutter", "iOS", "Android" }
+        ),
+        ["Analyste Données"] = (
+            "Analysez les données pour fournir des insights pertinents aux équipes métiers.",
+            new[] { "SQL", "Python", "Excel", "Power BI", "Data Analysis", "Statistics" }
+        ),
+        ["Testeur QA"] = (
+            "Testez les applications pour assurer leur qualité et leur fiabilité.",
+            new[] { "Selenium", "JMeter", "Test Cases", "Bug Tracking", "Automation" }
+        ),
+        ["Ingénieur Réseaux"] = (
+            "Assurez la configuration et la maintenance des infrastructures réseau.",
+            new[] { "Cisco", "Juniper", "Sécurité réseau", "VPN", "Firewall", "LAN/WAN" }
+        )
+    };
+
     public async Task SeedAsync()
     {
         try
@@ -36,152 +80,38 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
 
     private async Task TrySeedAsync()
     {
-        // Default data
-        var sampleJobOffers = new List<JobOffer>
-        {
-            new JobOffer
-            {
-                Id = 1,
-                Title = "Développeur Full Stack Junior",
-                Company = "TechNova",
-                Location = "Paris, France",
-                Description =
-                    "Rejoignez notre équipe dynamique pour développer des applications web innovantes.",
-                Requirements = new List<string>
-                    {
-                        "Connaissances en JavaScript, HTML, CSS", "Notions de React ou Angular"
-                    },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "30 000 € - 35 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 2,
-                Title = "Ingénieur DevOps Junior",
-                Company = "CloudSolutions",
-                Location = "Lyon, France",
-                Description =
-                    "Participez à la mise en place de pipelines CI/CD et à la gestion de l'infrastructure cloud.",
-                Requirements =
-                    new List<string>
-                    {
-                        "Bases en Docker et Kubernetes", "Connaissances en scripts Bash ou Python"
-                    },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "32 000 € - 36 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 3,
-                Title = "Administrateur Systèmes Junior",
-                Company = "NetSecure",
-                Location = "Marseille, France",
-                Description =
-                    "Assurez la maintenance et la supervision des systèmes informatiques de nos clients.",
-                Requirements =
-                    new List<string> { "Connaissances en Linux/Windows", "Notions de réseaux TCP/IP" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "28 000 € - 33 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 4,
-                Title = "Développeur Backend Junior",
-                Company = "DataCorp",
-                Location = "Toulouse, France",
-                Description = "Développez des API robustes et évolutives pour nos applications internes.",
-                Requirements =
-                    new List<string> { "Maîtrise de Java ou Node.js", "Connaissances en bases de données SQL" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "31 000 € - 34 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 5,
-                Title = "Ingénieur d'Études Junior",
-                Company = "Innovatech",
-                Location = "Nantes, France",
-                Description =
-                    "Participez à la conception et au développement de solutions logicielles sur mesure.",
-                Requirements =
-                    new List<string> { "Connaissances en UML", "Notions de gestion de projet Agile" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "30 000 € - 35 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 6,
-                Title = "Technicien Support Informatique",
-                Company = "HelpDeskPro",
-                Location = "Strasbourg, France",
-                Description = "Fournissez un support technique de premier niveau aux utilisateurs.",
-                Requirements =
-                    new List<string> { "Bonne communication", "Connaissances de base en hardware et software" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDD",
-                Salary = "25 000 € - 28 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 7,
-                Title = "Développeur Mobile Junior",
-                Company = "AppCreators",
-                Location = "Bordeaux, France",
-                Description = "Contribuez au développement d'applications mobiles innovantes.",
-                Requirements =
-                    new List<string> { "Connaissances en Swift ou Kotlin", "Notions de design mobile" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "30 000 € - 33 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 8,
-                Title = "Analyste Données Junior",
-                Company = "DataInsights",
-                Location = "Lille, France",
-                Description = "Analysez les données pour fournir des insights pertinents aux équipes métiers.",
-                Requirements = new List<string> { "Maîtrise d'Excel", "Notions de SQL et Python" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "29 000 € - 32 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 9,
-                Title = "Testeur QA Junior",
-                Company = "QualitySoft",
-                Location = "Rennes, France",
-                Description = "Testez les applications pour assurer leur qualité et leur fiabilité.",
-                Requirements =
-                    new List<string> { "Connaissances en tests fonctionnels", "Notions de Selenium ou JMeter" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "28 000 € - 31 000 € par an"
-            },
-            new JobOffer
-            {
-                Id = 10,
-                Title = "Ingénieur Réseaux Junior",
-                Company = "NetConnect",
-                Location = "Grenoble, France",
-                Description = "Assurez la configuration et la maintenance des infrastructures réseau.",
-                Requirements =
-                    new List<string> { "Connaissances en Cisco ou Juniper", "Notions de sécurité réseau" },
-                ExperienceLevel = "Débutant accepté",
-                ContractType = "CDI",
-                Salary = "30 000 € - 34 000 € par an"
-            }
-        };
-
         if (!context.JobOffers.Any())
         {
-            context.JobOffers.AddRange(sampleJobOffers);
+            var jobOffers = new List<JobOffer>();
+            var companies = new[] { "TechNova", "CloudSolutions", "NetSecure", "DataCorp", "Innovatech", 
+                                  "HelpDeskPro", "AppCreators", "DataInsights", "QualitySoft", "NetConnect" };
+            var locations = new[] { "Paris", "Lyon", "Marseille", "Toulouse", "Nantes", 
+                                  "Strasbourg", "Bordeaux", "Lille", "Rennes", "Grenoble" };
+
+            for (int i = 0; i < 10; i++)
+            {
+                var template = JobTemplates.ElementAt(i);
+                var jobOffer = new JobOffer
+                {
+                    Id = i + 1,
+                    Title = $"{template.Key} Junior",
+                    Company = companies[i],
+                    Location = $"{locations[i]}, France",
+                    Description = template.Value.Description,
+                    ExperienceLevel = "Débutant accepté",
+                    ContractType = "CDI",
+                    Salary = $"{28000 + (i * 1000)} € - {33000 + (i * 1000)} € par an",
+                    Skills = template.Value.Skills.Select(skillName => new Skill
+                    {
+                        Name = skillName,
+                        Description = $"Compétence en {skillName}"
+                    }).ToList()
+                };
+
+                jobOffers.Add(jobOffer);
+            }
+
+            context.JobOffers.AddRange(jobOffers);
             await context.SaveChangesAsync();
         }
     }

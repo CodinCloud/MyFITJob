@@ -1,19 +1,41 @@
-﻿namespace MyFITJob.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MyFITJob.Models;
 
 public class JobOffer
 {
     public int Id { get; set; }
-    public string Title { get; set; }
-    public string Company { get; set; }
-    public string Location { get; set; }
-    public string Description { get; set; }
-    public string ExperienceLevel { get; set; }
-    public string ContractType { get; set; }
-    public string Salary { get; set; }
-    public List<string> Requirements { get; set; }
-    public JobOfferStatus Status { get; set; }
+
+    [Required]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    public string Company { get; set; } = string.Empty;
+
+    [Required]
+    public string Location { get; set; } = string.Empty;
+
+    [Required]
+    public string Description { get; set; } = string.Empty;
+
+    public List<string> Requirements { get; set; } = new();
+
+    public string ExperienceLevel { get; set; } = string.Empty;
+
+    public string ContractType { get; set; } = string.Empty;
+
+    public string Salary { get; set; } = string.Empty;
+
+    public JobOfferStatus Status { get; set; } = JobOfferStatus.New;
+
     public DateTime CreatedAt { get; set; }
+
     public DateTime UpdatedAt { get; set; }
+
     public DateTime? LastInteraction { get; set; }
+
     public int CommentsCount { get; set; }
+
+    // Collection de Skills
+    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
 }

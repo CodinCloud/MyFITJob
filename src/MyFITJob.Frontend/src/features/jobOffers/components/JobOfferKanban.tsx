@@ -15,7 +15,7 @@ export const JobOfferKanban: React.FC = () => {
     return <div>Erreur lors du chargement des offres d'emploi</div>;
   }
 
-  const jobOffers =  (jobOffersResult?.isSuccess) ? jobOffersResult.value : [];
+  const jobOffers = (jobOffersResult?.isSuccess) ? jobOffersResult.value : [];
 
   // Grouper les offres par statut
   const offersByStatus = Object.values(JobOfferStatus).reduce((acc, status) => {
@@ -40,8 +40,13 @@ export const JobOfferKanban: React.FC = () => {
             title: offer.title,
             description: offer.description,
             company: offer.company,
-            date: new Date(offer.lastInteraction ?? offer.updatedAt).toLocaleDateString(),
+            location: offer.location,
+            experienceLevel: offer.experienceLevel,
+            contractType: offer.contractType,
+            salary: offer.salary,
+            date: new Date(offer.updatedAt).toLocaleDateString(),
             commentsCount: offer.commentsCount,
+            skills: offer.skills.map(skill => skill.name).join(', '),
           }))}
         />
       ))}

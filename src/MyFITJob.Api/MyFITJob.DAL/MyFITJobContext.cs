@@ -10,6 +10,7 @@ public class MyFITJobContext : DbContext
     { }
 
     public DbSet<JobOffer> JobOffers { get; set; }
+    public DbSet<Skill> Skills { get; set; }
 
     // Si tu as d'autres entités, ajoute-les ici
     // public DbSet<AutreEntite> AutresEntites { get; set; }
@@ -47,6 +48,27 @@ public class MyFITJobContext : DbContext
             
             entity.Property(e => e.CommentsCount)
                 .HasDefaultValue(0);
+
+            // Configuration de la relation avec Skills
+            entity.HasMany(e => e.Skills)
+                  .WithOne(s => s.JobOffer)
+                  .HasForeignKey(s => s.JobOfferId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Skill>(entity =>
+        {
+            entity.ToTable("Skills");
+            
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            // Index pour optimiser les recherches par nom
+            entity.HasIndex(e => e.Name);
         });
     }
 }
