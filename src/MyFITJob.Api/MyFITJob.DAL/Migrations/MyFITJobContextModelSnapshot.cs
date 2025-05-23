@@ -23,6 +23,21 @@ namespace MyFITJob.DAL.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("JobOfferSkill", b =>
+                {
+                    b.Property<int>("JobOffersId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SkillsId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("JobOffersId", "SkillsId");
+
+                    b.HasIndex("SkillsId");
+
+                    b.ToTable("JobOfferSkills", (string)null);
+                });
+
             modelBuilder.Entity("MyFITJob.Models.JobOffer", b =>
                 {
                     b.Property<int>("Id")
@@ -104,42 +119,46 @@ namespace MyFITJob.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
-
-                    b.Property<int>("JobOfferId")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnUpdate()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("JobOfferId");
-
-                    b.HasIndex("Name");
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Skills", (string)null);
                 });
 
-            modelBuilder.Entity("MyFITJob.Models.Skill", b =>
+            modelBuilder.Entity("JobOfferSkill", b =>
                 {
-                    b.HasOne("MyFITJob.Models.JobOffer", "JobOffer")
-                        .WithMany("Skills")
-                        .HasForeignKey("JobOfferId")
+                    b.HasOne("MyFITJob.Models.JobOffer", null)
+                        .WithMany()
+                        .HasForeignKey("JobOffersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("JobOffer");
-                });
-
-            modelBuilder.Entity("MyFITJob.Models.JobOffer", b =>
-                {
-                    b.Navigation("Skills");
+                    b.HasOne("MyFITJob.Models.Skill", null)
+                        .WithMany()
+                        .HasForeignKey("SkillsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

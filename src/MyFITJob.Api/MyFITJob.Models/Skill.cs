@@ -4,9 +4,9 @@ public class Skill
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string Description { get; set; } = string.Empty;
+    public string? Description { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
     
-    // Clé étrangère et propriété de navigation
-    public int JobOfferId { get; set; }
-    public JobOffer JobOffer { get; set; } = null!;
+    public ICollection<JobOffer> JobOffers { get; set; } = new List<JobOffer>();
 } 

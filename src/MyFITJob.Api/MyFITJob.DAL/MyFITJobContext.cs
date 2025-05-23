@@ -49,11 +49,10 @@ public class MyFITJobContext : DbContext
             entity.Property(e => e.CommentsCount)
                 .HasDefaultValue(0);
 
-            // Configuration de la relation avec Skills
+            // Configuration de la relation many-to-many avec Skills
             entity.HasMany(e => e.Skills)
-                  .WithOne(s => s.JobOffer)
-                  .HasForeignKey(s => s.JobOfferId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                  .WithMany(e => e.JobOffers)
+                  .UsingEntity(j => j.ToTable("JobOfferSkills"));
         });
 
         modelBuilder.Entity<Skill>(entity =>
@@ -67,8 +66,15 @@ public class MyFITJobContext : DbContext
             entity.Property(e => e.Description)
                 .HasMaxLength(500);
 
-            // Index pour optimiser les recherches par nom
-            entity.HasIndex(e => e.Name);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .ValueGeneratedOnUpdate();
+
+            // Index unique pour éviter les doublons de noms
+            entity.HasIndex(e => e.Name).IsUnique();
         });
     }
 }

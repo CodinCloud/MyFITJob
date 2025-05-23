@@ -80,9 +80,35 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
 
     private async Task TrySeedAsync()
     {
+        // Création des skills uniques
+        var allSkills = JobTemplates.Values
+            .SelectMany(t => t.Skills)
+            .Distinct()
+            .Select(skillName => new Skill
+            {
+                Name = skillName,
+                Description = $"Compétence en {skillName}",
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            })
+            .ToList();
+
+        // Sauvegarde des skills et récupération des IDs
+        foreach (var skill in allSkills)
+        {
+            var existingSkill = await context.Skills
+                .FirstOrDefaultAsync(s => s.Name == skill.Name);
+
+            if (existingSkill == null)
+            {
+                context.Skills.Add(skill);
+            }
+        }
+        await context.SaveChangesAsync();
+
+        // Création des offres d'emploi si nécessaire
         if (!context.JobOffers.Any())
         {
-            var jobOffers = new List<JobOffer>();
             var companies = new[] { "TechNova", "CloudSolutions", "NetSecure", "DataCorp", "Innovatech", 
                                   "HelpDeskPro", "AppCreators", "DataInsights", "QualitySoft", "NetConnect" };
             var locations = new[] { "Paris", "Lyon", "Marseille", "Toulouse", "Nantes", 
@@ -101,17 +127,21 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
                     ExperienceLevel = "Débutant accepté",
                     ContractType = "CDI",
                     Salary = $"{28000 + (i * 1000)} € - {33000 + (i * 1000)} € par an",
-                    Skills = template.Value.Skills.Select(skillName => new Skill
-                    {
-                        Name = skillName,
-                        Description = $"Compétence en {skillName}"
-                    }).ToList()
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
                 };
 
-                jobOffers.Add(jobOffer);
+                // Récupération des skills existants pour cette offre
+                var skills = await context.Skills
+                    .Where(s => template.Value.Skills.Contains(s.Name))
+                    .ToListAsync();
+
+                // Ajout direct des skills à l'offre
+                jobOffer.Skills = skills;
+
+                context.JobOffers.Add(jobOffer);
             }
 
-            context.JobOffers.AddRange(jobOffers);
             await context.SaveChangesAsync();
         }
     }
