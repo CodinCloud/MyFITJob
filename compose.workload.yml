@@ -1,0 +1,55 @@
+services:
+  db:
+    image: postgres:17.2
+    container_name: myfitjob-db-workload
+    restart: always
+    environment:
+      POSTGRES_USER: myfitjob
+      POSTGRES_PASSWORD: myfitjobpass
+      POSTGRES_DB: myfitjobdb
+      PGDATABASE: myfitjobdb
+      PGUSER: myfitjob
+      PGPASSWORD: myfitjobpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_workload:/var/lib/postgresql/data
+    cpus: 1
+    mem_limit: 1g
+
+  backend:
+    container_name: myfitjob-api-workload
+    build:
+      context: ./src/MyFITJob.Api
+      dockerfile: Dockerfile
+      target: prod
+    ports:
+      - "8081:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
+    depends_on:
+      - db
+    cpus: 1
+    mem_limit: 1g
+
+  frontend:
+    container_name: myfitjob-frontend-workload
+    build:
+      context: src/MyFITJob.Frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./src/MyFITJob.Frontend:/app:cached
+      - /app/node_modules  # pour isoler les dépendances
+    working_dir: /app
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"  # Port de Vite en dev      # ou tout port sur lequel Vite écoute
+    cpus: 0.5
+    mem_limit: 1g
+
+volumes:
+  postgres_data_workload: 

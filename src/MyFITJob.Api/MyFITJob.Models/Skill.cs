@@ -8,5 +8,5 @@ public class Skill
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     
-    public ICollection<JobOffer> JobOffers { get; set; } = new List<JobOffer>();
+    public virtual ICollection<JobOffer> JobOffers { get; set; } = new List<JobOffer>();
 } 

@@ -37,5 +37,5 @@ public class JobOffer
     public int CommentsCount { get; set; }
 
     // Navigation property pour la relation many-to-many
-    public ICollection<Skill> Skills { get; set; } = new List<Skill>();
+    public virtual ICollection<Skill> Skills { get; set; } = new List<Skill>();
 }
