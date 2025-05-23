@@ -17,7 +17,8 @@ public class JobOfferService : IJobOfferService
     public async Task<IEnumerable<JobOffer>> GetJobOffersAsync(string searchTerm, int? skillId = null)
     {
         var query = _context.JobOffers
-            .Include(j => j.Skills)
+            // .Include(j => j.Skills)
+            .OrderBy(j => j.Description)
             .AsQueryable();
 
         if (!string.IsNullOrEmpty(searchTerm))
@@ -28,6 +29,8 @@ public class JobOfferService : IJobOfferService
                 j.Company.Contains(searchTerm));
         }
 
+        var offers = query.ToList();
+        
         if (skillId.HasValue)
         {
             query = query.Where(j => j.Skills.Any(s => s.Id == skillId.Value));

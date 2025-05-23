@@ -8,8 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddDbContext<MyFITJobContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<MyFITJobContext>(options => options
+        .UseLazyLoadingProxies()
+        .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<MyFITJobContextInitializer>();
 builder.Services.AddScoped<IJobOfferService, JobOfferService>();

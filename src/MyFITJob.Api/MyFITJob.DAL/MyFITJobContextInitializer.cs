@@ -65,6 +65,40 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
         )
     };
 
+    private static readonly string[] Companies = new[]
+    {
+        "TechNova", "CloudSolutions", "NetSecure", "DataCorp", "Innovatech",
+        "HelpDeskPro", "AppCreators", "DataInsights", "QualitySoft", "NetConnect",
+        "CyberTech", "WebMasters", "CodeCraft", "DataFlow", "SmartSystems",
+        "FutureTech", "DigitalWave", "ByteForce", "TechVision", "CodeGenius"
+    };
+
+    private static readonly string[] Locations = new[]
+    {
+        "Paris", "Lyon", "Marseille", "Toulouse", "Nantes",
+        "Strasbourg", "Bordeaux", "Lille", "Rennes", "Grenoble",
+        "Nice", "Montpellier", "Lille", "Toulon", "Angers",
+        "Brest", "Dijon", "Saint-Étienne", "Le Havre", "Reims"
+    };
+
+    private static readonly string[] ExperienceLevels = new[]
+    {
+        "Débutant accepté",
+        "1-3 ans d'expérience",
+        "3-5 ans d'expérience",
+        "5-8 ans d'expérience",
+        "8+ ans d'expérience"
+    };
+
+    private static readonly string[] ContractTypes = new[]
+    {
+        "CDI",
+        "CDD",
+        "Freelance",
+        "Stage",
+        "Alternance"
+    };
+
     public async Task SeedAsync()
     {
         try
@@ -106,43 +140,50 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
         }
         await context.SaveChangesAsync();
 
+        // Récupération de tous les skills pour les utiliser dans les offres
+        var skills = await context.Skills.ToListAsync();
+
         // Création des offres d'emploi si nécessaire
         if (!context.JobOffers.Any())
         {
-            var companies = new[] { "TechNova", "CloudSolutions", "NetSecure", "DataCorp", "Innovatech", 
-                                  "HelpDeskPro", "AppCreators", "DataInsights", "QualitySoft", "NetConnect" };
-            var locations = new[] { "Paris", "Lyon", "Marseille", "Toulouse", "Nantes", 
-                                  "Strasbourg", "Bordeaux", "Lille", "Rennes", "Grenoble" };
+            var jobOffers = new List<JobOffer>();
+            var batchSize = 100; // Taille des lots pour l'insertion
+            var builder = new JobOfferBuilder(JobTemplates, Companies, Locations, ExperienceLevels, ContractTypes);
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 10000; i++)
             {
-                var template = JobTemplates.ElementAt(i);
-                var jobOffer = new JobOffer
+                var template = JobTemplates.ElementAt(new Random().Next(JobTemplates.Count));
+                var jobOffer = builder
+                    .New()
+                    .WithRandomTemplate()
+                    .WithRandomCompany()
+                    .WithRandomLocation()
+                    .WithRandomExperienceLevel()
+                    .WithRandomContractType()
+                    .WithRandomSalary()
+                    .WithRandomStatus()
+                    .WithRandomDates()
+                    .WithRandomCommentsCount()
+                    .WithRandomSkills(skills, template.Value.Skills)
+                    .Build();
+
+                jobOffers.Add(jobOffer);
+
+                // Sauvegarde par lots pour optimiser les performances
+                if (jobOffers.Count >= batchSize)
                 {
-                    Id = i + 1,
-                    Title = $"{template.Key} Junior",
-                    Company = companies[i],
-                    Location = $"{locations[i]}, France",
-                    Description = template.Value.Description,
-                    ExperienceLevel = "Débutant accepté",
-                    ContractType = "CDI",
-                    Salary = $"{28000 + (i * 1000)} € - {33000 + (i * 1000)} € par an",
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                // Récupération des skills existants pour cette offre
-                var skills = await context.Skills
-                    .Where(s => template.Value.Skills.Contains(s.Name))
-                    .ToListAsync();
-
-                // Ajout direct des skills à l'offre
-                jobOffer.Skills = skills;
-
-                context.JobOffers.Add(jobOffer);
+                    context.JobOffers.AddRange(jobOffers);
+                    await context.SaveChangesAsync();
+                    jobOffers.Clear();
+                }
             }
 
-            await context.SaveChangesAsync();
+            // Sauvegarde des offres restantes
+            if (jobOffers.Any())
+            {
+                context.JobOffers.AddRange(jobOffers);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }
