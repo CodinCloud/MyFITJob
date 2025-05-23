@@ -10,6 +10,7 @@ public class MyFITJobContext : DbContext
     { }
 
     public DbSet<JobOffer> JobOffers { get; set; }
+    public DbSet<Skill> Skills { get; set; }
 
     // Si tu as d'autres entités, ajoute-les ici
     // public DbSet<AutreEntite> AutresEntites { get; set; }
@@ -47,6 +48,33 @@ public class MyFITJobContext : DbContext
             
             entity.Property(e => e.CommentsCount)
                 .HasDefaultValue(0);
+
+            // Configuration de la relation many-to-many avec Skills
+            entity.HasMany(e => e.Skills)
+                  .WithMany(e => e.JobOffers)
+                  .UsingEntity(j => j.ToTable("JobOfferSkills"));
+        });
+
+        modelBuilder.Entity<Skill>(entity =>
+        {
+            entity.ToTable("Skills");
+            
+            entity.Property(e => e.Name)
+                .IsRequired()
+                .HasMaxLength(100);
+            
+            entity.Property(e => e.Description)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .ValueGeneratedOnUpdate();
+
+            // Index unique pour éviter les doublons de noms
+            entity.HasIndex(e => e.Name).IsUnique();
         });
     }
 }

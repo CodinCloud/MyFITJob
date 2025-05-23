@@ -1,6 +1,6 @@
 using MyFITJob.Models;
 
-namespace MyFITJob.Api.Models;
+namespace MyFITJob.BusinessLogic.DTOs;
 
 public record JobOfferDto
 {
@@ -12,7 +12,7 @@ public record JobOfferDto
     public string ExperienceLevel { get; init; } = string.Empty;
     public string ContractType { get; init; } = string.Empty;
     public string Salary { get; init; } = string.Empty;
-    public string Status { get; init; }
+    public JobOfferStatus Status { get; init; }
     public DateTime CreatedAt { get; init; }
     public DateTime UpdatedAt { get; init; }
     public int CommentsCount { get; init; }
@@ -30,7 +30,7 @@ public record JobOfferDto
             ExperienceLevel = jobOffer.ExperienceLevel,
             ContractType = jobOffer.ContractType,
             Salary = jobOffer.Salary,
-            Status = jobOffer.Status.Name,
+            Status = jobOffer.Status,
             CreatedAt = jobOffer.CreatedAt,
             UpdatedAt = jobOffer.UpdatedAt,
             CommentsCount = jobOffer.CommentsCount,
@@ -54,4 +54,4 @@ public record CreateJobOfferDto
     public string ContractType { get; init; } = string.Empty;
     public string Salary { get; init; } = string.Empty;
     public ICollection<CreateSkillDto> Skills { get; init; } = new List<CreateSkillDto>();
-}
+} 

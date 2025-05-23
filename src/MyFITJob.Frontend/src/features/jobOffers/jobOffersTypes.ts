@@ -10,16 +10,40 @@ export enum JobOfferStatus {
   Archived = 'archived'
 }
 
+export type Skill = {
+  id: number;
+  name: string;
+  description: string;
+};
+
+export type CreateSkill = {
+  name: string;
+  description: string;
+};
+
 export type JobOffer = {
   id: number;
   title: string;
   description: string;
   company: string;
   location: string;
-  salary?: string;
+  experienceLevel: string;
+  contractType: string;
+  salary: string;
   status: JobOfferStatus;
   createdAt: string;
   updatedAt: string;
-  lastInteraction?: string;
-  commentsCount?: number;
+  commentsCount: number;
+  skills: Skill[];
+};
+
+export type CreateJobOffer = {
+  title: string;
+  description: string;
+  company: string;
+  location: string;
+  experienceLevel: string;
+  contractType: string;
+  salary: string;
+  skills: CreateSkill[];
 };

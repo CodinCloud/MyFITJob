@@ -5,10 +5,13 @@ type KanbanCard = {
   title: string;
   description: string;
   company: string;
+  location: string;
+  experienceLevel: string;
+  contractType: string;
+  salary: string;
   date: string;
-  commentsCount?: number;
-  filesCount?: number;
-  highlight?: boolean;
+  commentsCount: number;
+  skills: string;
 };
 
 type KanbanColumnProps = {
@@ -19,7 +22,7 @@ type KanbanColumnProps = {
 
 export const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, cards }) => {
   return (
-    <div className="flex flex-col w-80 bg-gray-50 rounded-lg p-4">
+    <div className="flex flex-col w-96 bg-gray-50 rounded-lg p-4">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold text-gray-700">{title}</h3>
         <span className="bg-gray-200 text-gray-600 px-2 py-1 rounded-full text-sm">
@@ -30,26 +33,37 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, cards 
         {cards.map((card) => (
           <div
             key={card.id}
-            className={`bg-white p-4 rounded-lg shadow-sm ${
-              card.highlight ? 'border-l-4 border-blue-500' : ''
-            }`}
+            className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
           >
             <h4 className="font-medium text-gray-800">{card.title}</h4>
-            <p className="text-sm text-gray-600 mt-1">{card.description}</p>
+            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{card.description}</p>
+            <div className="mt-2">
+              <p className="text-sm font-medium text-gray-700">{card.company}</p>
+              <p className="text-sm text-gray-500">{card.location}</p>
+            </div>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                {card.experienceLevel}
+              </span>
+              <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                {card.contractType}
+              </span>
+              <span className="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">
+                {card.salary}
+              </span>
+            </div>
+            {card.skills && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500 line-clamp-1">{card.skills}</p>
+              </div>
+            )}
             <div className="flex justify-between items-center mt-3 text-sm text-gray-500">
               <span>{card.date}</span>
-              <div className="flex gap-2">
-                {card.commentsCount && (
-                  <span className="flex items-center gap-1">
-                    💬 {card.commentsCount}
-                  </span>
-                )}
-                {card.filesCount && (
-                  <span className="flex items-center gap-1">
-                    📎 {card.filesCount}
-                  </span>
-                )}
-              </div>
+              {card.commentsCount > 0 && (
+                <span className="flex items-center gap-1">
+                  💬 {card.commentsCount}
+                </span>
+              )}
             </div>
           </div>
         ))}
