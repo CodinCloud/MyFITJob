@@ -10,18 +10,17 @@ const homepageTrend = new Trend('homepage_duration');
 export const options = {
   stages: [
     { duration: '30s', target: 100 },    // Montée rapide à 100 utilisateurs
-    { duration: '1m', target: 500 },     // Maintien à 500 utilisateurs
-    { duration: '30s', target: 1000 },   // Montée à 1000 utilisateurs
     { duration: '1m', target: 1000 },    // Maintien à 1000 utilisateurs
-    { duration: '30s', target: 0 },      // Ramp-down
+    { duration: '1m', target: 2000 },    // Maintien à 1000 utilisateurs
+    { duration: '30s', target: 100 },      // Ramp-down
   ],
+
   thresholds: {
     'errors': ['rate<0.1'],              // Moins de 10% d'erreurs
     'http_req_duration': ['p(95)<2000'], // 95% des requêtes sous 2s
   },
 };
 
-// Headers pour simuler un navigateur Chrome
 const headers = {
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -43,7 +42,22 @@ export default function () {
     headers: headers,
     tags: { name: 'homepage' }
   });
+
+  const js = http.get('http://localhost:3000/assets/index-CBmt8EXl.js', {
+    headers: headers,
+    tags: { name: 'js' }
+  });
+
+  const js2 = http.get('http://localhost:3000/assets/index-DDw97B-X.js', {
+    headers: headers,
+    tags: { name: 'js' }
+  });
   
+  const css = http.get('http://localhost:3000/assets/index-BrnsacLJ.css', {
+    headers: headers,
+    tags: { name: 'css' }
+  });
+
   // Vérifications
   check(homeRes, {
     'status is 200': (r) => r.status === 200,

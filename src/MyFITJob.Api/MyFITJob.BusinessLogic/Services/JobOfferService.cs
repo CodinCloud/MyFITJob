@@ -17,7 +17,7 @@ public class JobOfferService : IJobOfferService
     public async Task<IEnumerable<JobOffer>> GetJobOffersAsync(string searchTerm, int? skillId = null)
     {
         var query = _context.JobOffers
-            // .Include(j => j.Skills)
+            .Include(j => j.Skills)
             .OrderBy(j => j.Description)
             .AsQueryable();
 
