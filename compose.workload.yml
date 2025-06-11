@@ -1,3 +1,24 @@
+# CONFIGURATION DOCKER-COMPOSE POUR LOAD TESTING
+# ================================================
+# 
+# OPTIMISATIONS DISPONIBLES POUR LA DÉMO :
+# 
+# 1. POSTGRESQL : Décommenter les lignes "command:" pour augmenter :
+#    - max_connections (200 au lieu de 100 par défaut)
+#    - shared_buffers, work_mem, etc. pour de meilleures performances
+#
+# 2. CONNECTION STRING .NET : Décommenter la ligne optimisée pour :
+#    - Maximum Pool Size=100 (au lieu de 32 par défaut)
+#    - Minimum Pool Size=10 (connexions pré-ouvertes)
+#    - Connection pooling optimisé
+#
+# 3. RESSOURCES DOCKER : Décommenter les lignes "cpus/mem_limit" pour :
+#    - BDD : 1→2 CPU, 1→2GB RAM
+#    - Backend : 1→2 CPU, 1→2GB RAM
+#
+# EFFET ATTENDU : Support de 500+ req/s au lieu de ~100 req/s
+# ================================================
+
 services:
   db:
     image: postgres:17.2
@@ -10,12 +31,28 @@ services:
       PGDATABASE: myfitjobdb
       PGUSER: myfitjob
       PGPASSWORD: myfitjobpass
+      # Optimisations PostgreSQL pour la charge
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    # OPTIMISATIONS POSTGRESQL POUR LOAD TESTING - Décommenter pour la démo
+    # command: >
+    #   postgres 
+    #   -c max_connections=200
+    #   -c shared_buffers=256MB
+    #   -c effective_cache_size=1GB
+    #   -c maintenance_work_mem=64MB
+    #   -c checkpoint_completion_target=0.9
+    #   -c wal_buffers=16MB
+    #   -c default_statistics_target=100
+    #   -c random_page_cost=1.1
+    #   -c effective_io_concurrency=200
+    #   -c work_mem=4MB
     ports:
       - "5432:5432"
     volumes:
       - postgres_data_workload:/var/lib/postgresql/data
-    cpus: 1
-    mem_limit: 1g
+    # RESSOURCES OPTIMISÉES - Décommenter pour la démo
+    # cpus: 2
+    # mem_limit: 2g
 
   backend:
     container_name: myfitjob-api-workload
@@ -29,10 +66,15 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
+      # CONNECTION STRING OPTIMISÉE POUR LOAD TESTING - Décommenter pour la démo
+      # - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass;Maximum Pool Size=100;Minimum Pool Size=10;Connection Idle Lifetime=30;Connection Pruning Interval=10;Command Timeout=30;Timeout=30;Pooling=true
     depends_on:
       - db
-    # cpus: 1
-    # mem_limit: 1g
+    cpus: 1
+    mem_limit: 1g
+    # RESSOURCES OPTIMISÉES - Décommenter pour la démo
+    # cpus: 2
+    # mem_limit: 2g
 
   frontend:
     container_name: myfitjob-frontend-workload
