@@ -50,7 +50,9 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data_workload:/var/lib/postgresql/data
-    # RESSOURCES OPTIMISÉES - Décommenter pour la démo
+    cpus: 1
+    mem_limit: 1g
+    # RESSOURCES OPTIMISÉES 
     # cpus: 2
     # mem_limit: 2g
 
@@ -90,6 +92,7 @@ services:
     cpus: 0.5
     mem_limit: 1g
 
+  ### MONITORING 
   prometheus:
     image: prom/prometheus:latest
     container_name: myfitjob-prometheus-workload
