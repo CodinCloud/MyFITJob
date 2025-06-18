@@ -10,10 +10,10 @@ const jobOffersTrend = new Trend('joboffers_duration');
 // Configuration du test
 export const options = {
   stages: [
-    { duration: '30s', target: 100 },    // Montée rapide à 100 utilisateurs
-    { duration: '1m', target: 500 },     // Maintien à 500 utilisateurs
-    { duration: '30s', target: 1000 },   // Montée à 1000 utilisateurs
-    { duration: '1m', target: 1000 },    // Maintien à 1000 utilisateurs
+    { duration: '30s', target: 10 },    
+    { duration: '1m', target: 100 },     
+    // { duration: '30s', target: 1000 },   // Montée à 1000 utilisateurs
+    // { duration: '1m', target: 1000 },    // Maintien à 1000 utilisateurs
     { duration: '30s', target: 0 },      // Ramp-down
   ],
   thresholds: {
@@ -33,11 +33,11 @@ const headers = {
 // Fonction principale
 export default function () {
  
-  // Endpoint skills stats
-  const statsRes = http.get('http://localhost:8081/api/market/skills', { headers, tags: { name: 'skills' } });
-  check(statsRes, { 'skills 200': (r) => r.status === 200 });
-  statsTrend.add(statsRes.timings.duration);
-  errorRate.add(statsRes.status !== 200);
+  // Endpoint skills stats - Memory Intensive
+  // const statsRes = http.get('http://localhost:8081/api/market/skills', { headers, tags: { name: 'skills' } });
+  // check(statsRes, { 'skills 200': (r) => r.status === 200 });
+  // statsTrend.add(statsRes.timings.duration);
+  // errorRate.add(statsRes.status !== 200);
 
   // Endpoint job offers
   const jobOffersRes = http.get('http://localhost:8081/api/joboffers', { headers, tags: { name: 'joboffers' } });

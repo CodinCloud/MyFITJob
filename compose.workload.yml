@@ -1,3 +1,24 @@
+# CONFIGURATION DOCKER-COMPOSE POUR LOAD TESTING
+# ================================================
+# 
+# OPTIMISATIONS DISPONIBLES POUR LA DÉMO :
+# 
+# 1. POSTGRESQL : Décommenter les lignes "command:" pour augmenter :
+#    - max_connections (200 au lieu de 100 par défaut)
+#    - shared_buffers, work_mem, etc. pour de meilleures performances
+#
+# 2. CONNECTION STRING .NET : Décommenter la ligne optimisée pour :
+#    - Maximum Pool Size=100 (au lieu de 32 par défaut)
+#    - Minimum Pool Size=10 (connexions pré-ouvertes)
+#    - Connection pooling optimisé
+#
+# 3. RESSOURCES DOCKER : Décommenter les lignes "cpus/mem_limit" pour :
+#    - BDD : 1→2 CPU, 1→2GB RAM
+#    - Backend : 1→2 CPU, 1→2GB RAM
+#
+# EFFET ATTENDU : Support de 500+ req/s au lieu de ~100 req/s
+# ================================================
+
 services:
   db:
     image: postgres:17.2
@@ -10,12 +31,30 @@ services:
       PGDATABASE: myfitjobdb
       PGUSER: myfitjob
       PGPASSWORD: myfitjobpass
+      # Optimisations PostgreSQL pour la charge
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256"
+    # OPTIMISATIONS POSTGRESQL POUR LOAD TESTING - Décommenter pour la démo
+    # command: >
+    #   postgres 
+    #   -c max_connections=200
+    #   -c shared_buffers=256MB
+    #   -c effective_cache_size=1GB
+    #   -c maintenance_work_mem=64MB
+    #   -c checkpoint_completion_target=0.9
+    #   -c wal_buffers=16MB
+    #   -c default_statistics_target=100
+    #   -c random_page_cost=1.1
+    #   -c effective_io_concurrency=200
+    #   -c work_mem=4MB
     ports:
       - "5432:5432"
     volumes:
       - postgres_data_workload:/var/lib/postgresql/data
     cpus: 1
     mem_limit: 1g
+    # RESSOURCES OPTIMISÉES 
+    # cpus: 2
+    # mem_limit: 2g
 
   backend:
     container_name: myfitjob-api-workload
@@ -24,32 +63,94 @@ services:
       dockerfile: Dockerfile
       target: prod
     ports:
-      - "8081:8080"
+      - "8081:8080"  # Port principal de l'API
+      # - "9091:9091"  # Port des métriques Prometheus
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
+      # CONNECTION STRING OPTIMISÉE POUR LOAD TESTING - Décommenter pour la démo
+      # - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass;Maximum Pool Size=100;Minimum Pool Size=10;Connection Idle Lifetime=30;Connection Pruning Interval=10;Command Timeout=30;Timeout=30;Pooling=true
     depends_on:
       - db
     cpus: 1
     mem_limit: 1g
+    # RESSOURCES OPTIMISÉES - Décommenter pour la démo
+    # cpus: 2
+    # mem_limit: 2g
 
   frontend:
     container_name: myfitjob-frontend-workload
     build:
       context: src/MyFITJob.Frontend
       dockerfile: Dockerfile
-      target: dev
-    volumes:
-      - ./src/MyFITJob.Frontend:/app:cached
-      - /app/node_modules  # pour isoler les dépendances
+      target: prod
     working_dir: /app
-    command: npm run dev -- --host 0.0.0.0
     environment:
       NODE_ENV: development
     ports:
-      - "3000:3000"  # Port de Vite en dev      # ou tout port sur lequel Vite écoute
+      - "3000:80"  # Port de Vite en dev      # ou tout port sur lequel Vite écoute
     cpus: 0.5
     mem_limit: 1g
 
+  ### MONITORING 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: myfitjob-prometheus-workload
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    cpus: 0.5
+    mem_limit: 512m
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: myfitjob-grafana-workload
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    cpus: 0.5
+    mem_limit: 512m
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    container_name: myfitjob-postgres-exporter-workload
+    environment:
+      - DATA_SOURCE_NAME=postgresql://myfitjob:myfitjobpass@db:5432/myfitjobdb?sslmode=disable
+    ports:
+      - "9187:9187"
+    depends_on:
+      - db
+    cpus: 0.2
+    mem_limit: 256m
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: myfitjob-nginx-exporter
+    command:
+      - --nginx.scrape-uri=http://frontend/nginx_status
+    ports:
+      - "9113:9113"
+    depends_on:
+      - frontend
+    cpus: 0.1
+    mem_limit: 128m
+
 volumes:
-  postgres_data_workload: 
+  postgres_data_workload:
+  prometheus_data:
+  grafana_data: 
