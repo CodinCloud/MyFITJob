@@ -111,6 +111,31 @@ services:
     cpus: 0.1
     mem_limit: 128m
 
+  nginx-reverse-exporter:
+    image: nginx/nginx-prometheus-exporter:latest
+    container_name: myfitjob-nginx-reverse-exporter
+    command:
+      - --nginx.scrape-uri=http://nginx/nginx_status
+    ports:
+      - "9114:9113"
+    depends_on:
+      - nginx
+    cpus: 0.1
+    mem_limit: 128m
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: myfitjob-jaeger
+    ports:
+      - "16686:16686"   # UI Jaeger (web)
+      - "6831:6831/udp" # Agent (UDP)
+      - "6832:6832/udp"
+      - "14268:14268"   # Collector (HTTP)
+      - "14250:14250"   # gRPC
+      - "9411:9411"     # Zipkin compatible
+    cpus: 0.2
+    mem_limit: 256m
+
 volumes:
   postgres_data:
   prometheus_data:
