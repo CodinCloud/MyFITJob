@@ -1,0 +1,20 @@
+# Utilise une image Node officielle légère
+FROM node:20-alpine
+
+# Crée le dossier de travail
+WORKDIR /app
+
+# Copie les fichiers package.json et package-lock.json
+COPY package*.json ./
+
+# Installe les dépendances de production
+RUN npm install --production
+
+# Copie le reste du code source
+COPY . .
+
+# Expose le port utilisé par le service
+EXPOSE 3002
+
+# Commande de démarrage
+CMD ["node", "server.js"]

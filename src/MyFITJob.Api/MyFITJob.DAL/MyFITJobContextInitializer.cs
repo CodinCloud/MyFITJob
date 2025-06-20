@@ -150,7 +150,7 @@ public class MyFITJobContextInitializer(ILogger<MyFITJobContextInitializer> logg
             var batchSize = 100; // Taille des lots pour l'insertion
             var builder = new JobOfferBuilder(JobTemplates, Companies, Locations, ExperienceLevels, ContractTypes);
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 50; i++)
             {
                 var template = JobTemplates.ElementAt(new Random().Next(JobTemplates.Count));
                 var jobOffer = builder

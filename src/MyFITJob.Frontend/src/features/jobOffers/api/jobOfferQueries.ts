@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { jobOffersApi } from './jobOffersApi';
+import { useEnrichedJobOffers } from '@/features/contacts/api/contactsQueries';
 
 /**
  * Hooks et fonctions React Query pour la gestion des offres d'emploi
@@ -10,7 +11,7 @@ export const jobOfferKeys = {
 };
 
 export const useJobOffers = () => {
-  return useQuery({
+  const { data: jobOffersResult, isLoading: jobOffersLoading, error: jobOffersError } = useQuery({
     queryKey: jobOfferKeys.all,
     queryFn: jobOffersApi.fetchJobOffers,
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -18,4 +19,16 @@ export const useJobOffers = () => {
     retry: false,
     throwOnError: false,
   });
+
+  const jobOffers = jobOffersResult?.isSuccess ? jobOffersResult.value : [];
+  
+  const { enrichedJobOffers, isLoading: contactsLoading } = useEnrichedJobOffers(jobOffers);
+
+  return {
+    data: jobOffersResult?.isSuccess ? 
+      { isSuccess: true, value: enrichedJobOffers } : 
+      jobOffersResult,
+    isLoading: jobOffersLoading || contactsLoading,
+    error: jobOffersError 
+  };
 }; 

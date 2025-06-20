@@ -3,7 +3,7 @@ import type { MostSoughtSkill, Skill } from '../marketAnalysisTypes';
 
 export const marketAnalysisApi = {
   fetchMostSoughtSkills: async (): Promise<MostSoughtSkill[]> => {
-    const res = await fetch('http://localhost:8081/api/market/skills?top=5');
+    const res = await fetch('/api/market/skills?top=5');
     if (!res.ok) throw new Error('Erreur lors du chargement des skills');
     const skills: Skill[] = await res.json();
     // Mapping pour le chart

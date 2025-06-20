@@ -7,7 +7,7 @@ import { Result } from '@/core/functional/Result';
 export const jobOffersApi = {
   fetchJobOffers: async (): Promise<Result<JobOffer[]>> => {
     try {
-      const response = await fetch('http://localhost:8081/api/jobOffers');
+      const response = await fetch('/api/jobOffers');
       if (!response.ok) {
         return Result.failure(new Error('Erreur lors du chargement des offres d\'emploi'));
       }
