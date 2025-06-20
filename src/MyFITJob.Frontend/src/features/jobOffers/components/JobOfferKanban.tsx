@@ -19,9 +19,9 @@ export const JobOfferKanban: React.FC = () => {
 
   // Grouper les offres par statut
   const offersByStatus = Object.values(JobOfferStatus).reduce((acc, status) => {
-    acc[status] = jobOffers.filter((offer: JobOffer) => offer.status === status);
+    acc[status] = jobOffers.filter((offer: JobOffer & { companyInfo?: any }) => offer.status === status);
     return acc;
-  }, {} as Record<JobOfferStatus, JobOffer[]>);
+  }, {} as Record<JobOfferStatus, (JobOffer & { companyInfo?: any })[]>);
 
   // Filtrer les offres archivées
   const filteredOffersByStatus = Object.fromEntries(
@@ -35,7 +35,7 @@ export const JobOfferKanban: React.FC = () => {
           key={status}
           title={status}
           count={offers.length}
-          cards={offers.map((offer: JobOffer) => ({
+          cards={offers.map((offer: JobOffer & { companyInfo?: any }) => ({
             id: offer.id,
             title: offer.title,
             description: offer.description,
@@ -47,6 +47,7 @@ export const JobOfferKanban: React.FC = () => {
             date: new Date(offer.updatedAt).toLocaleDateString(),
             commentsCount: offer.commentsCount,
             skills: offer.skills.map(skill => skill.name).join(', '),
+            companyInfo: offer.companyInfo,
           }))}
         />
       ))}

@@ -4,7 +4,6 @@ type KanbanCard = {
   id: number;
   title: string;
   description: string;
-  company: string;
   location: string;
   experienceLevel: string;
   contractType: string;
@@ -44,12 +43,12 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, cards 
             <h4 className="font-medium text-gray-800">{card.title}</h4>
             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{card.description}</p>
             <div className="mt-2">
-              <p className="text-sm font-medium text-gray-700">{card.company}</p>
+              <p className="text-sm font-medium text-gray-700">{card.companyInfo!.industry} - {card.companyInfo!.size} - {card.companyInfo!.rating}</p>
               <p className="text-sm text-gray-500">{card.location}</p>
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {card.companyInfo ? `${card.companyInfo.industry} • ${card.companyInfo.size}` : card.company}
+                {card.companyInfo ? `${card.companyInfo.industry} • ${card.companyInfo.size}` : "Indisponible"}
               </span>
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                 {card.contractType}
