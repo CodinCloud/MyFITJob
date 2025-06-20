@@ -1,6 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
 import { contactsApi } from './contactsApi';
-import type { CompanyInfo } from '../contactsTypes';
 
 /**
  * Hooks et fonctions React Query pour la gestion des contacts
