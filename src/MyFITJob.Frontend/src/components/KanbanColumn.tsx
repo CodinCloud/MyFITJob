@@ -12,6 +12,12 @@ type KanbanCard = {
   date: string;
   commentsCount: number;
   skills: string;
+  // Données provenant du microservice de contacts
+  companyInfo?: {
+    industry: string;
+    size: string;
+    rating: number;
+  };
 };
 
 type KanbanColumnProps = {
@@ -43,7 +49,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, cards 
             </div>
             <div className="mt-2 flex flex-wrap gap-2">
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                {card.experienceLevel}
+                {card.companyInfo ? `${card.companyInfo.industry} • ${card.companyInfo.size}` : card.company}
               </span>
               <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
                 {card.contractType}
