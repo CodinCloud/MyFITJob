@@ -40,6 +40,15 @@ services:
     environment:
       NODE_ENV: development
 
+  contacts:
+    build:
+      context: ./src/MyFITJob.Contacts
+      dockerfile: DockerFile
+    ports:
+      - "3010:3002"
+    environment:
+      NODE_ENV: production
+
   nginx:
     image: nginx:latest
     container_name: myfitjob-nginx
@@ -135,6 +144,7 @@ services:
       - "9411:9411"     # Zipkin compatible
     cpus: 0.2
     mem_limit: 256m
+
 
 volumes:
   postgres_data:

@@ -1,7 +1,7 @@
 import type { CompanyInfo } from '../contactsTypes';
 import { Result } from '@/core/functional/Result';
 
-const CONTACTS_SERVICE_URL = 'http://localhost:3002';
+const CONTACTS_SERVICE_URL = 'http://localhost:3010';
 
 /**
  * API pour la gestion des contacts et informations d'entreprises (pattern Result<T>)
