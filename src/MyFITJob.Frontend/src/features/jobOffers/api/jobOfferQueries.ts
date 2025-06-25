@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobOffersApi } from './jobOffersApi';
 import { useEnrichedJobOffers } from '@/features/contacts/api/contactsQueries';
+import type { CreateJobOffer } from '../jobOffersTypes';
 
 /**
  * Hooks et fonctions React Query pour la gestion des offres d'emploi
@@ -31,4 +32,16 @@ export const useJobOffers = () => {
     isLoading: jobOffersLoading || contactsLoading,
     error: jobOffersError 
   };
+};
+
+export const useCreateJobOffer = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: jobOffersApi.createJobOffer,
+    onSuccess: () => {
+      // Invalider le cache pour rafraîchir la liste
+      queryClient.invalidateQueries({ queryKey: jobOfferKeys.all });
+    },
+  });
 }; 

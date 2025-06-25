@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -6,7 +7,11 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import { JobOfferKanban } from '@/features/jobOffers/components/JobOfferKanban'
+import { CreateJobOfferModal } from '@/features/jobOffers/components/CreateJobOfferModal'
+import { useCreateJobOffer } from '@/features/jobOffers/api/jobOfferQueries'
+import { useToast } from '@/components/ui/use-toast'
 import { MostSoughtSkillsChart } from '@/features/marketAnalysis'
+import type { CreateJobOffer } from '@/features/jobOffers/jobOffersTypes'
 
 import logo from '../assets/mjf_logo2.png'
 
@@ -17,6 +22,40 @@ export const Route = createFileRoute('/')({
 })
 
 function App() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const createJobOfferMutation = useCreateJobOffer();
+  const { toast } = useToast();
+
+  const handleCreateJobOffer = async (data: CreateJobOffer) => {
+    try {
+      const result = await createJobOfferMutation.mutateAsync(data);
+      if (result.isSuccess) {
+        // Succès - afficher un toast et fermer la modal
+        toast({
+          title: "Succès !",
+          description: "L'offre d'emploi a été créée avec succès.",
+        });
+        setIsModalOpen(false);
+      } else {
+        // Erreur - afficher le message d'erreur
+        toast({
+          title: "Erreur",
+          description: result.error?.message || "Une erreur est survenue lors de la création de l'offre.",
+          variant: "destructive",
+        });
+        throw result.error;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur inattendue est survenue.",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-muted">
       {/* Sidebar */}
@@ -49,7 +88,10 @@ function App() {
           <div className="flex items-center gap-4">
             <Button variant="ghost">Sort by</Button>
             <Button variant="ghost">Filters</Button>
-            <Button><PlusIcon />  Add Job Offer</Button>
+            <Button onClick={() => setIsModalOpen(true)}>
+              <PlusIcon className="mr-2 h-4 w-4" />
+              Add Job Offer
+            </Button>
           </div>
         </header>
         {/* Stats */}
@@ -88,6 +130,13 @@ function App() {
           <JobOfferKanban />
         </section>
       </main>
+
+      {/* Modal de création d'offre */}
+      <CreateJobOfferModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSubmit={handleCreateJobOffer}
+      />
     </div>
   )
 }
