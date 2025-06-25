@@ -5,4 +5,5 @@ namespace MyFITJob.DAL;
 public interface IJobOfferRepository
 {
     Task<List<JobOffer>> GetJobOffersAsync(string filter);
+    Task<JobOffer> CreateJobOfferAsync(JobOffer jobOffer);
 }

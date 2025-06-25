@@ -18,4 +18,11 @@ public class JobOfferRepository : IJobOfferRepository
             .Where(j => string.IsNullOrEmpty(filter) || j.Title.Contains(filter))
             .ToListAsync();
     }
+
+    public async Task<JobOffer> CreateJobOfferAsync(JobOffer jobOffer)
+    {
+        _context.JobOffers.Add(jobOffer);
+        await _context.SaveChangesAsync();
+        return jobOffer;
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MyFITJob.BusinessLogic.DTOs;
 using MyFITJob.DAL;
 using MyFITJob.Models;
@@ -7,11 +8,15 @@ namespace MyFITJob.BusinessLogic.Services;
 
 public class JobOfferService : IJobOfferService
 {
+    private readonly IJobOfferRepository _jobOfferRepository;
     private readonly MyFITJobContext _context;
+    private readonly ILogger<JobOfferService> _logger;
 
-    public JobOfferService(MyFITJobContext context)
+    public JobOfferService(IJobOfferRepository jobOfferRepository, MyFITJobContext context, ILogger<JobOfferService> logger)
     {
+        _jobOfferRepository = jobOfferRepository;
         _context = context;
+        _logger = logger;
     }
 
     public async Task<IEnumerable<JobOffer>> GetJobOffersAsync(string searchTerm, int? skillId = null)
@@ -48,6 +53,35 @@ public class JobOfferService : IJobOfferService
 
     public async Task<JobOffer> CreateJobOfferAsync(CreateJobOfferDto dto)
     {
+        _logger.LogInformation("Création d'une nouvelle offre d'emploi: {Title} chez {Company}", dto.Title, dto.Company);
+
+        // Gestion des skills existants vs nouveaux
+        var skills = new List<Skill>();
+        
+        foreach (var skillDto in dto.Skills)
+        {
+            // Rechercher un skill existant par nom (non-case sensitive)
+            var existingSkill = await _context.Skills
+                .FirstOrDefaultAsync(s => s.Name.ToLower() == skillDto.Name.ToLower());
+
+            if (existingSkill != null)
+            {
+                _logger.LogDebug("Skill existant trouvé: {SkillName}", existingSkill.Name);
+                skills.Add(existingSkill);
+            }
+            else
+            {
+                _logger.LogDebug("Création d'un nouveau skill: {SkillName}", skillDto.Name);
+                var newSkill = new Skill
+                {
+                    Name = skillDto.Name,
+                    Description = skillDto.Description
+                };
+                _context.Skills.Add(newSkill);
+                skills.Add(newSkill);
+            }
+        }
+
         var jobOffer = new JobOffer
         {
             Title = dto.Title,
@@ -60,16 +94,14 @@ public class JobOfferService : IJobOfferService
             Status = JobOfferStatus.New,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Skills = dto.Skills.Select(s => new Skill
-            {
-                Name = s.Name,
-                Description = s.Description
-            }).ToList()
+            Skills = skills
         };
 
-        _context.JobOffers.Add(jobOffer);
-        await _context.SaveChangesAsync();
-        return jobOffer;
+        var createdJobOffer = await _jobOfferRepository.CreateJobOfferAsync(jobOffer);
+        
+        _logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
+        
+        return createdJobOffer;
     }
 
     public async Task<JobOffer?> UpdateJobOfferAsync(int id, CreateJobOfferDto dto)

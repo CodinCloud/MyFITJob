@@ -1,13 +1,14 @@
 import type { JobOffer, CreateJobOffer } from '../jobOffersTypes';
 import { Result } from '@/core/functional/Result';
 
+const url = "http://localhost:8081"
 /**
  * API pour la gestion des offres d'emploi (pattern Result<T>)
  */
 export const jobOffersApi = {
   fetchJobOffers: async (): Promise<Result<JobOffer[]>> => {
     try {
-      const response = await fetch('/api/jobOffers');
+      const response = await fetch(`${url}/api/jobOffers`);
       if (!response.ok) {
         return Result.failure(new Error('Erreur lors du chargement des offres d\'emploi'));
       }
@@ -20,7 +21,7 @@ export const jobOffersApi = {
 
   createJobOffer: async (jobOffer: CreateJobOffer): Promise<Result<JobOffer>> => {
     try {
-      const response = await fetch('/api/jobOffers', {
+      const response = await fetch(`${url}/api/jobOffers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
