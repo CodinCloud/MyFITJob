@@ -1,7 +1,7 @@
 import React from 'react';
 import { KanbanColumn } from '@/components/KanbanColumn';
 import { useJobOffers } from '../api/jobOfferQueries';
-import { JobOfferStatus } from '../jobOffersTypes';
+import { JobOfferStatus, JobOfferStatusDisplayNames } from '../jobOffersTypes';
 import type { JobOffer } from '../jobOffersTypes';
 
 export const JobOfferKanban: React.FC = () => {
@@ -19,9 +19,9 @@ export const JobOfferKanban: React.FC = () => {
 
   // Grouper les offres par statut
   const offersByStatus = Object.values(JobOfferStatus).reduce((acc, status) => {
-    acc[status] = jobOffers.filter((offer: JobOffer & { companyInfo?: any }) => offer.status === status);
+    acc[status] = jobOffers.filter((offer: JobOffer) => offer.status.name === status);
     return acc;
-  }, {} as Record<JobOfferStatus, (JobOffer & { companyInfo?: any })[]>);
+  }, {} as Record<JobOfferStatus, JobOffer[]>);
 
   // Filtrer les offres archivées
   const filteredOffersByStatus = Object.fromEntries(
@@ -29,13 +29,13 @@ export const JobOfferKanban: React.FC = () => {
   );
 
   return (
-    <div className="flex gap-6">
+    <div className="flex gap-6 min-w-max">
       {Object.entries(filteredOffersByStatus).map(([status, offers]) => (
         <KanbanColumn
           key={status}
-          title={status}
+          title={JobOfferStatusDisplayNames[status as JobOfferStatus]}
           count={offers.length}
-          cards={offers.map((offer: JobOffer & { companyInfo?: any }) => ({
+          cards={offers.map((offer: JobOffer) => ({
             id: offer.id,
             title: offer.title,
             description: offer.description,

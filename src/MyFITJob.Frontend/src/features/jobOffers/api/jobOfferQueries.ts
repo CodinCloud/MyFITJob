@@ -1,6 +1,5 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { jobOffersApi } from './jobOffersApi';
-import { useEnrichedJobOffers } from '@/features/contacts/api/contactsQueries';
 
 /**
  * Hooks et fonctions React Query pour la gestion des offres d'emploi
@@ -21,14 +20,24 @@ export const useJobOffers = () => {
   });
 
   const jobOffers = jobOffersResult?.isSuccess ? jobOffersResult.value : [];
-  
-  const { enrichedJobOffers, isLoading: contactsLoading } = useEnrichedJobOffers(jobOffers);
 
   return {
     data: jobOffersResult?.isSuccess ? 
-      { isSuccess: true, value: enrichedJobOffers } : 
+      { isSuccess: true, value: jobOffers } : 
       jobOffersResult,
-    isLoading: jobOffersLoading || contactsLoading,
+    isLoading: jobOffersLoading,
     error: jobOffersError 
   };
+};
+
+export const useCreateJobOffer = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: jobOffersApi.createJobOffer,
+    onSuccess: () => {
+      // Invalider le cache pour rafraîchir la liste
+      queryClient.invalidateQueries({ queryKey: jobOfferKeys.all });
+    },
+  });
 }; 

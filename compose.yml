@@ -23,7 +23,11 @@ services:
       target: prod
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - Logging__LogLevel__Default=Debug
       - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
+      - ContactsApi__BaseUrl=http://contacts:3002
+      - RabbitMQ__Host=amqp://rabbitmq:5672
+      - RabbitMQ__ServiceName=MyFITJob.Api
     depends_on:
       - db
 
@@ -48,6 +52,12 @@ services:
       - "3010:3002"
     environment:
       NODE_ENV: production
+      DATA_DIR: /app/data
+      RABBITMQ_URL: amqp://rabbitmq:5672
+    volumes:
+      - contacts_data:/app/data
+    depends_on:
+      - rabbitmq
 
   nginx:
     image: nginx:latest
@@ -61,6 +71,17 @@ services:
       - backend
     cpus: 0.2
     mem_limit: 128m
+
+# Message Broker 
+  rabbitmq:
+    image: rabbitmq:management-alpine
+    container_name: myfitjob-rabbitmq
+    ports:
+      - "5672:5672" # Queue 
+      - "15672:15672" # Portail web
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    hostname: rabbitmq 
 
 # Monitoring
   prometheus:
@@ -149,4 +170,6 @@ services:
 volumes:
   postgres_data:
   prometheus_data:
-  grafana_data: 
+  grafana_data:
+  contacts_data: 
+  rabbitmq_data:

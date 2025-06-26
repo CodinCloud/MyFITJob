@@ -1,7 +1,11 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
-using MyFITJob.BusinessLogic;
-using MyFITJob.BusinessLogic.Services;
-using MyFITJob.DAL;
+using MyFITJob.Api.Infrastructure.Data;
+using MyFITJob.Api.Infrastructure.Integrations;
+using MyFITJob.Api.JobOffers.Application;
+using MyFITJob.Api.JobOffers.Endpoints;
+using MyFITJob.Api.MarketAnalysis.Application;
+using MyFITJob.Api.MarketAnalysis.Endpoints;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
@@ -11,13 +15,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<MyFITJobContext>(options => options
-        .UseLazyLoadingProxies()
         .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services .AddHttpClient();
 
 builder.Services.AddScoped<MyFITJobContextInitializer>();
 builder.Services.AddScoped<IJobOfferService, JobOfferService>();
 builder.Services.AddScoped<IJobOfferRepository, JobOfferRepository>();
 builder.Services.AddScoped<ISkillExtractorService, SkillExtractorService>();
+builder.Services.AddScoped<IContactsService, ContactsService>();
 
 builder.Services.AddCors((options) =>
 {
@@ -31,7 +37,21 @@ builder.Services.AddCors((options) =>
         });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddMassTransit(x =>
+{
+    x.SetKebabCaseEndpointNameFormatter();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+       var rabbitMqHost = builder.Configuration["RabbitMQ:Host"]!;
+       Console.WriteLine($"Connecting to RabbitMQ at: {rabbitMqHost}");
+       
+       cfg.Host(new Uri(rabbitMqHost));
+       
+       cfg.ConfigureEndpoints(context);
+    });    
+});
+
+builder.Services.AddMassTransitHostedService();
 
 // Ajout des métriques Prometheus via OpenTelemetry
 builder.Services.AddOpenTelemetry()
@@ -77,6 +97,9 @@ app.UseHttpsRedirection();
 // Activation des métriques Prometheus
 app.MapPrometheusScrapingEndpoint();
 
-app.MapControllers();
+// Configuration des Minimal API Endpoints
+app.MapGetJobOffers();
+app.MapCreateJobOffer();
+app.MapGetMostSoughtSkills();
 
 app.Run();
