@@ -7,9 +7,16 @@ export type CompanyInfo = {
 export type Company = {
   id: number;
   name: string;
-  info?: CompanyInfo;
+  industry: string;
+  size: string;
+  rating: number;
+  description: string;
 };
 
 export type CreateCompany = {
   name: string;
+  industry: string;
+  size: string;
+  rating?: number;
+  description?: string;
 }; 

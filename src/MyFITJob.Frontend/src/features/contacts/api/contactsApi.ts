@@ -1,14 +1,14 @@
-import type { CompanyInfo } from '../contactsTypes';
+import type { Company } from '../contactsTypes';
 import { Result } from '@/core/functional/Result';
 
-// const CONTACTS_SERVICE_URL = 'http://localhost:3010'; // Port directe, sans reverse-proxy
-const CONTACTS_SERVICE_URL = '';
+const CONTACTS_SERVICE_URL = 'http://localhost:3002'; // Port directe, sans reverse-proxy
+// const CONTACTS_SERVICE_URL = '';
 
 /**
  * API pour la gestion des contacts et informations d'entreprises (pattern Result<T>)
  */
 export const contactsApi = {
-  fetchCompanyInfo: async (companyId: number): Promise<Result<CompanyInfo>> => {
+  fetchCompanyInfo: async (companyId: number): Promise<Result<Company>> => {
     try {
       const response = await fetch(`${CONTACTS_SERVICE_URL}/api/companies/${companyId}`);
       if (!response.ok) {
@@ -21,7 +21,7 @@ export const contactsApi = {
     }
   },
 
-  fetchCompanyInfoBatch: async (companyIds: number[]): Promise<Result<Record<number, CompanyInfo>>> => {
+  fetchCompanyInfoBatch: async (companyIds: number[]): Promise<Result<Record<number, Company>>> => {
     try {
       const promises = companyIds.map(id => 
         fetch(`${CONTACTS_SERVICE_URL}/api/companies/${id}`)
@@ -30,7 +30,7 @@ export const contactsApi = {
       );
 
       const results = await Promise.all(promises);
-      const companyInfoMap: Record<number, CompanyInfo> = {};
+      const companyInfoMap: Record<number, Company> = {};
 
       companyIds.forEach((id, index) => {
         if (results[index]) {

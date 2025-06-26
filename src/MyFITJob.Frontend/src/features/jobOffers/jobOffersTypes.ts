@@ -54,6 +54,11 @@ export type JobOffer = {
   updatedAt: string;
   commentsCount: number;
   skills: Skill[];
+  // Informations enrichies de l'entreprise
+  companyName: string;
+  industry: string;
+  companySize: string;
+  companyRating: number;
 };
 
 export type CreateJobOffer = {
