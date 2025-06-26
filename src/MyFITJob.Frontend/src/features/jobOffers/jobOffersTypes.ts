@@ -10,6 +10,19 @@ export enum JobOfferStatus {
   Archived = 'archived'
 }
 
+// Mapping des noms vers les display names pour l'affichage
+export const JobOfferStatusDisplayNames: Record<JobOfferStatus, string> = {
+  [JobOfferStatus.New]: 'Nouvelle',
+  [JobOfferStatus.Saved]: 'Sauvegardée',
+  [JobOfferStatus.Applied]: 'Candidature envoyée',
+  [JobOfferStatus.InterviewPlanned]: 'Entretien planifié',
+  [JobOfferStatus.Interviewed]: 'Entretien réalisé',
+  [JobOfferStatus.OfferReceived]: 'Offre reçue',
+  [JobOfferStatus.Accepted]: 'Acceptée',
+  [JobOfferStatus.Rejected]: 'Refusée',
+  [JobOfferStatus.Archived]: 'Archivée'
+};
+
 export type Skill = {
   id: number;
   name: string;
@@ -21,6 +34,12 @@ export type CreateSkill = {
   description: string;
 };
 
+// Type pour l'objet JobOfferStatus retourné par l'API
+export type JobOfferStatusObject = {
+  name: string;
+  displayName: string;
+};
+
 export type JobOffer = {
   id: number;
   title: string;
@@ -30,7 +49,7 @@ export type JobOffer = {
   experienceLevel: string;
   contractType: string;
   salary: string;
-  status: JobOfferStatus;
+  status: JobOfferStatusObject; // Maintenant un objet avec name et displayName
   createdAt: string;
   updatedAt: string;
   commentsCount: number;

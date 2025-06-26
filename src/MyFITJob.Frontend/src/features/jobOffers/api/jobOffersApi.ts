@@ -1,7 +1,9 @@
 import type { JobOffer, CreateJobOffer } from '../jobOffersTypes';
 import { Result } from '@/core/functional/Result';
 
-const url = "http://localhost:8081"
+const url = "http://localhost:8081" 
+//const url = ""
+
 /**
  * API pour la gestion des offres d'emploi (pattern Result<T>)
  */

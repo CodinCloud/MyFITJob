@@ -126,8 +126,10 @@ function App() {
           </Card>
         </section>
         {/* Kanban */}
-        <section className="flex-1 px-10 py-8 bg-white overflow-auto">
-          <JobOfferKanban />
+        <section className="flex-1 px-10 py-8 bg-white overflow-hidden" style={{ width: 'calc(100vw - 256px)' }}>
+          <div className="overflow-x-auto">
+            <JobOfferKanban />
+          </div>
         </section>
       </main>
 
