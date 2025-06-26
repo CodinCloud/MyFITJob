@@ -1,4 +1,4 @@
-using System.Text.Json;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MyFITJob.Api.Infrastructure.Data;
 using MyFITJob.Api.Infrastructure.Integrations;
@@ -36,6 +36,22 @@ builder.Services.AddCors((options) =>
                 .AllowAnyHeader();
         });
 });
+
+builder.Services.AddMassTransit(x =>
+{
+    x.SetKebabCaseEndpointNameFormatter();
+    x.UsingRabbitMq((context, cfg) =>
+    {
+       var rabbitMqHost = builder.Configuration["RabbitMQ:Host"]!;
+       Console.WriteLine($"Connecting to RabbitMQ at: {rabbitMqHost}");
+       
+       cfg.Host(new Uri(rabbitMqHost));
+       
+       cfg.ConfigureEndpoints(context);
+    });    
+});
+
+builder.Services.AddMassTransitHostedService();
 
 // Ajout des métriques Prometheus via OpenTelemetry
 builder.Services.AddOpenTelemetry()

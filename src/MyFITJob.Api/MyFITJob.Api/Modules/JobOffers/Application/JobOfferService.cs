@@ -1,8 +1,10 @@
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using MyFITJob.Api.Infrastructure.Data;
 using MyFITJob.Api.Infrastructure.Integrations;
 using MyFITJob.Api.JobOffers.Domain;
 using MyFITJob.Api.JobOffers.DTOs;
+using MyFITJob.Api.Messaging.Contracts;
 
 namespace MyFITJob.Api.JobOffers.Application;
 
@@ -12,17 +14,19 @@ public class JobOfferService : IJobOfferService
     private readonly MyFITJobContext _context;
     private readonly ILogger<JobOfferService> _logger;
     private readonly IContactsService _contactsService;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public JobOfferService(
         IJobOfferRepository jobOfferRepository,
         MyFITJobContext context,
         ILogger<JobOfferService> logger,
-        IContactsService contactsService)
+        IContactsService contactsService, IPublishEndpoint publishEndpoint)
     {
         _jobOfferRepository = jobOfferRepository;
         _context = context;
         _logger = logger;
         _contactsService = contactsService;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<List<JobOfferDto>> GetJobOffersAsync(string searchTerm)
@@ -69,7 +73,7 @@ public class JobOfferService : IJobOfferService
     {
         _logger.LogInformation("Création d'une nouvelle offre d'emploi: {Title}", dto.Title);
 
-        // Créer ou récupérer l'entreprise via l'API Contacts
+        /*
         var createCompanyDto = new CreateCompanyDto
         {
             Name = dto.Company,
@@ -82,11 +86,13 @@ public class JobOfferService : IJobOfferService
         
         _logger.LogInformation("Entreprise créée/récupérée avec succès: {CompanyName}", companyInfo.Name);
 
+        */
+        
         // Créer l'offre d'emploi
         var jobOffer = new JobOffer
         {
             Title = dto.Title,
-            CompanyId = companyInfo.Id,
+            // CompanyId = companyInfo.Id,
             Location = dto.Location,
             Salary = dto.Salary,
             Description = dto.Description,
@@ -133,8 +139,11 @@ public class JobOfferService : IJobOfferService
 
         var createdJobOffer = await _jobOfferRepository.CreateJobOfferAsync(jobOffer);
         
+        // Créer ou récupérer l'entreprise via l'API Contacts
+        await _publishEndpoint.Publish(new JobOfferCreated(createdJobOffer.Id, dto.Company, "Tech", "10-150"));
+        
         _logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
-        var createdJobOfferDto = JobOfferDto.FromDomain(createdJobOffer, companyInfo); 
+        var createdJobOfferDto = JobOfferDto.FromDomain(createdJobOffer); 
         return createdJobOfferDto;
     }
 
