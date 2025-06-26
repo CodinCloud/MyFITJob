@@ -24,3 +24,30 @@ ENV DATA_DIR=/app/data
 
 # Commande de démarrage
 CMD ["node", "server.js"]
+
+# Stage de développement pour le hot reload
+FROM node:20-alpine AS dev
+
+# Crée le dossier de travail
+WORKDIR /app
+
+# Crée le dossier de données pour la persistance
+RUN mkdir -p /app/data
+
+# Copie les fichiers package.json et package-lock.json
+COPY package*.json ./
+
+# Installe TOUTES les dépendances (incluant devDependencies pour nodemon)
+RUN npm install
+
+# Copie le reste du code source
+COPY . .
+
+# Expose le port utilisé par le service
+EXPOSE 3002
+
+# Variable d'environnement pour le dossier de données
+ENV DATA_DIR=/app/data
+ENV NODE_ENV=development
+
+# Pas de CMD ici - sera défini dans compose.override.yml

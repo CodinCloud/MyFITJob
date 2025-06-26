@@ -29,4 +29,4 @@ COPY ["MyFITJob.Api/MyFITJob.Api.csproj", "MyFITJob.Api/"]
 RUN dotnet restore "MyFITJob.Api/MyFITJob.Api.csproj"
 COPY . .
 WORKDIR "/src/MyFITJob.Api"
-ENTRYPOINT ["dotnet", "watch", "run", "--project", "./MyFITJob.Api/MyFITJob.Api.csproj", "--urls=http://0.0.0.0:80"] 
+ENTRYPOINT ["dotnet", "watch", "run", "--urls=http://0.0.0.0:80"] 

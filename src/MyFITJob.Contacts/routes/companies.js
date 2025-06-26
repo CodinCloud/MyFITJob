@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const companyId = parseInt(req.params.id);
-    
+    console.log('📥 GET /api/companies/:id - Payload reçu:', JSON.stringify(req.params, null, 2));
     if (isNaN(companyId)) {
       return res.status(400).json({
         success: false,

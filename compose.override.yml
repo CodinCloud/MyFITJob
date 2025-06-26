@@ -1,0 +1,57 @@
+services:
+  # Override du backend (.NET API) pour le hot reload
+  backend:
+    build:
+      context: ./src/MyFITJob.Api
+      dockerfile: Dockerfile
+      target: dev  # Utilise la target dev au lieu de prod
+    volumes:
+      - ./src/MyFITJob.Api:/src
+      - ~/.nuget/packages:/root/.nuget/packages  # cache NuGet
+    ports:
+      - "5000:80"  # Le stage dev expose sur le port 80
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=myfitjobdb;Username=myfitjob;Password=myfitjobpass
+      - ContactsApi__BaseUrl=http://contacts:3002
+    depends_on:
+      - db
+
+  # Override du frontend (React/Vue) pour le hot reload
+  frontend:
+    build:
+      context: src/MyFITJob.Frontend
+      dockerfile: Dockerfile
+      target: dev
+    volumes:
+      - ./src/MyFITJob.Frontend:/app:cached
+      - /app/node_modules  # pour isoler les dépendances
+    working_dir: /app
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+
+  # Override du service contacts pour le hot reload
+  contacts:
+    build:
+      context: ./src/MyFITJob.Contacts
+      dockerfile: DockerFile
+      target: dev  # Assurez-vous d'avoir une target dev dans votre Dockerfile
+    volumes:
+      - ./src/MyFITJob.Contacts:/app
+      - /app/node_modules
+      - contacts_data:/app/data  # Préserve les données
+    working_dir: /app
+    command: ["npm", "run", "dev"]  # Utilise le script dev du package.json
+    ports:
+      - "3010:3002"  # Garde le même port que dans le compose principal
+    environment:
+      NODE_ENV: development  # Change en development pour le hot reload
+      DATA_DIR: /app/data
+
+  # Override de nginx pour le développement
+  nginx:
+    volumes:
+      - ./nginx/conf.d/dev.conf:/etc/nginx/conf.d/default.conf:ro

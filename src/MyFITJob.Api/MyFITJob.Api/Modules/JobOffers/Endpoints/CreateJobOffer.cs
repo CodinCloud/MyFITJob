@@ -20,7 +20,7 @@ public static class CreateJobOffer
                 
                 logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
 
-                return Results.CreatedAtRoute("GetJobOffers", new { id = createdJobOffer.Id }, createdJobOffer);
+                return Results.Ok(createdJobOffer);
             }
             catch (Exception ex)
             {
