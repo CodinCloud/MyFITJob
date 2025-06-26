@@ -22,7 +22,6 @@ public class MyFITJobContext : DbContext
             entity.ToTable("JobOffers");
             
             entity.Property(e => e.Title).IsRequired();
-            entity.Property(e => e.Company).IsRequired();
             entity.Property(e => e.Location).IsRequired();
             entity.Property(e => e.Description).IsRequired();
             

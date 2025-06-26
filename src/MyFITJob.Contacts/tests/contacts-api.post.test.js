@@ -19,7 +19,6 @@ async function testCreateCompany() {
       name: 'Test Company',
       industry: 'Tech',
       size: '51-200',
-      rating: 4.5,
       description: 'Une entreprise de test'
     });
 

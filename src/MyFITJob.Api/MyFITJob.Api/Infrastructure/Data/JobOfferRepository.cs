@@ -23,8 +23,7 @@ public class JobOfferRepository : IJobOfferRepository
         {
             query = query.Where(j => 
                 j.Title.Contains(searchTerm) || 
-                j.Description.Contains(searchTerm) ||
-                j.Company.Contains(searchTerm));
+                j.Description.Contains(searchTerm));
         }
 
         return await query.ToListAsync();

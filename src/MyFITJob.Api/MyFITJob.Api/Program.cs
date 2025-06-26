@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using MyFITJob.Api.Infrastructure.Data;
 using MyFITJob.Api.Infrastructure.Integrations;
@@ -16,8 +17,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<MyFITJobContext>(options => options
         .UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Ajout d'HttpClient pour les appels API externes
-builder.Services.AddHttpClient();
+builder.Services .AddHttpClient();
 
 builder.Services.AddScoped<MyFITJobContextInitializer>();
 builder.Services.AddScoped<IJobOfferService, JobOfferService>();

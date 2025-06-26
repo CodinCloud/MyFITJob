@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyFITJob.Api.Infrastructure.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MyFITJob.Api.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(MyFITJobContext))]
-    partial class MyFITJobContextModelSnapshot : ModelSnapshot
+    [Migration("20250626123254_RefactoProjectStructure")]
+    partial class RefactoProjectStructure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,8 +54,9 @@ namespace MyFITJob.Api.Infrastructure.Data.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0);
 
-                    b.Property<int?>("CompanyId")
-                        .HasColumnType("integer");
+                    b.Property<string>("Company")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("ContractType")
                         .IsRequired()

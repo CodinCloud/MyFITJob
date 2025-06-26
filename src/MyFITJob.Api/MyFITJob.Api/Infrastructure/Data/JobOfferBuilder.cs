@@ -45,7 +45,7 @@ public class JobOfferBuilder
 
     public JobOfferBuilder WithRandomCompany()
     {
-        _jobOffer.Company = _companies[_random.Next(_companies.Length)];
+        _jobOffer.CompanyId = 1; 
         return this;
     }
 

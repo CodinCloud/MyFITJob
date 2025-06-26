@@ -8,14 +8,26 @@ function getCompanyById(id) {
   return company || null;
 }
 
+function getCompanyByName(name) {
+  const company = companies.find(c => c.name === name);
+  return company || null;
+}
+
 function getAllCompanies() {
   return companies;
 }
 
 function createCompany(companyData) {
-  // Validation des données
-  if (!companyData.name || !companyData.industry || !companyData.size) {
-    throw new Error('Name, industry, and size are required');
+  
+  // Vérification des champs requis
+  if (!companyData.name) {
+    throw new Error('Name is required');
+  }
+  if (!companyData.industry) {
+    throw new Error('Industry is required');
+  }
+  if (!companyData.size) {
+    throw new Error('Size is required');
   }
 
   // Vérifier si le nom existe déjà
@@ -39,6 +51,7 @@ function createCompany(companyData) {
 
 module.exports = {
   getCompanyById,
+  getCompanyByName,
   getAllCompanies,
   createCompany,
 }; 

@@ -48,31 +48,23 @@ public class JobOfferService : IJobOfferService
         _logger.LogInformation("Création d'une nouvelle offre d'emploi: {Title}", dto.Title);
 
         // Créer ou récupérer l'entreprise via l'API Contacts
-        CompanyInfo? companyInfo = null;
-        try
+        var createCompanyDto = new CreateCompanyDto
         {
-            var createCompanyDto = new CreateCompanyDto
-            {
-                Name = dto.Company,
-                Industry = "Tech", // Valeur par défaut
-                Size = "51-200",   // Valeur par défaut
-                Description = $"Entreprise pour l'offre: {dto.Title}"
-            };
+            Name = dto.Company,
+            Industry = "Tech", // Valeur par défaut
+            Size = "51-200",   // Valeur par défaut
+            Description = $"Entreprise pour l'offre: {dto.Title}"
+        };
 
-            companyInfo = await _contactsService.CreateCompanyAsync(createCompanyDto);
-            _logger.LogInformation("Entreprise créée/récupérée avec succès: {CompanyName}", companyInfo.Name);
-        }
-        catch (Exception ex)
-        {
-            // Gestion d'erreur gracieuse - on continue avec des valeurs par défaut
-            _logger.LogWarning(ex, "Impossible de créer/récupérer l'entreprise {Company}", dto.Company);
-        }
+        CompanyInfo companyInfo = await _contactsService.CreateCompanyAsync(createCompanyDto);
+        
+        _logger.LogInformation("Entreprise créée/récupérée avec succès: {CompanyName}", companyInfo.Name);
 
         // Créer l'offre d'emploi
         var jobOffer = new JobOffer
         {
             Title = dto.Title,
-            Company = dto.Company,
+            CompanyId = companyInfo.Id,
             Location = dto.Location,
             Salary = dto.Salary,
             Description = dto.Description,
@@ -134,7 +126,6 @@ public class JobOfferService : IJobOfferService
             return null;
 
         jobOffer.Title = dto.Title;
-        jobOffer.Company = dto.Company;
         jobOffer.Location = dto.Location;
         jobOffer.Description = dto.Description;
         jobOffer.ExperienceLevel = dto.ExperienceLevel;

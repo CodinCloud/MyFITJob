@@ -28,7 +28,6 @@ public record JobOfferDto
         {
             Id = jobOffer.Id,
             Title = jobOffer.Title,
-            Company = jobOffer.Company,
             Location = jobOffer.Location,
             Salary = jobOffer.Salary,
             Description = jobOffer.Description,
