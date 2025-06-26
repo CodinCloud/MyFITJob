@@ -2,9 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const companiesRouter = require('./routes/companies');
 const { initializeData } = require('./data/companies');
+const JobOfferCreatedConsumer = require('./consumers/JobOfferCreatedConsumer');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
+
+// Instance du consumer RabbitMQ
+let jobOfferConsumer = null;
 
 // Middleware
 app.use(cors());
@@ -81,11 +85,16 @@ async function startServer() {
     // Initialiser les données persistantes
     await initializeData();
     
+    // Initialiser le consumer RabbitMQ
+    jobOfferConsumer = new JobOfferCreatedConsumer();
+    await jobOfferConsumer.initialize();
+    
     app.listen(PORT, () => {
       console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
       console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
       console.log(`📖 API Documentation: http://localhost:${PORT}/`);
+      console.log(`🐰 RabbitMQ Consumer: En attente de messages...`);
     });
   } catch (error) {
     console.error('❌ Erreur lors du démarrage du serveur:', error);
@@ -94,3 +103,26 @@ async function startServer() {
 }
 
 startServer(); 
+
+// Gestion propre de la fermeture
+process.on('SIGINT', async () => {
+  console.log('\n🛑 Arrêt du serveur...');
+  
+  // Fermer proprement le consumer RabbitMQ
+  if (jobOfferConsumer) {
+    await jobOfferConsumer.close();
+  }
+  
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  console.log('\n🛑 Arrêt du serveur (SIGTERM)...');
+  
+  // Fermer proprement le consumer RabbitMQ
+  if (jobOfferConsumer) {
+    await jobOfferConsumer.close();
+  }
+  
+  process.exit(0);
+}); 

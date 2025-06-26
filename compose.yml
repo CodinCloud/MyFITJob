@@ -53,8 +53,11 @@ services:
     environment:
       NODE_ENV: production
       DATA_DIR: /app/data
+      RABBITMQ_URL: amqp://rabbitmq:5672
     volumes:
       - contacts_data:/app/data
+    depends_on:
+      - rabbitmq
 
   nginx:
     image: nginx:latest
