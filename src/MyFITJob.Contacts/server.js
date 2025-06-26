@@ -26,9 +26,31 @@ app.get('/', (req, res) => {
   res.json({
     service: 'MyFITJob.Contacts',
     version: '1.0.0',
+    description: 'REST API for company information management',
     endpoints: {
       health: '/health',
-      companies: '/api/companies/:id'
+      companies: {
+        getAll: 'GET /api/companies',
+        getById: 'GET /api/companies/:id',
+        create: 'POST /api/companies',
+        metadata: {
+          industries: 'GET /api/companies/metadata/industries',
+          sizes: 'GET /api/companies/metadata/sizes'
+        }
+      }
+    },
+    examples: {
+      createCompany: {
+        method: 'POST',
+        url: '/api/companies',
+        body: {
+          name: 'New Company',
+          industry: 'Tech',
+          size: '51-200',
+          rating: 4.5,
+          description: 'Company description'
+        }
+      }
     }
   });
 });
@@ -37,6 +59,7 @@ app.get('/', (req, res) => {
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
+    success: false,
     error: 'Internal server error',
     message: 'Something went wrong!'
   });
@@ -45,6 +68,7 @@ app.use((err, req, res, next) => {
 // 404 handler
 app.use('*', (req, res) => {
   res.status(404).json({
+    success: false,
     error: 'Not found',
     message: `Route ${req.originalUrl} not found`
   });
@@ -53,5 +77,6 @@ app.use('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies/:id`);
+  console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
+  console.log(`📖 API Documentation: http://localhost:${PORT}/`);
 }); 
