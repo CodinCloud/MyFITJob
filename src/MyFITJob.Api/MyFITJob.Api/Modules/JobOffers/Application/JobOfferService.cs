@@ -25,15 +25,37 @@ public class JobOfferService : IJobOfferService
         _contactsService = contactsService;
     }
 
-    public async Task<List<JobOffer>> GetJobOffersAsync(string searchTerm)
+    public async Task<List<JobOfferDto>> GetJobOffersAsync(string searchTerm)
     {
         _logger.LogInformation("Récupération des offres d'emploi avec le terme de recherche: {SearchTerm}", searchTerm);
         
         var jobOffers = await _jobOfferRepository.GetJobOffersAsync(searchTerm);
         
+        var jobOfferDtos = new List<JobOfferDto>();
+        foreach (var jobOffer in jobOffers)
+        {
+            var jobOfferDto = JobOfferDto.FromDomain(jobOffer);
+            jobOfferDto.CompanyInfo = CompanyInfo.NullCompanyInfo; 
+            
+            if (!jobOffer.CompanyId.HasValue)
+            {
+                jobOfferDtos.Add(jobOfferDto);
+                continue;
+            }
+            
+            var companyInfo = await _contactsService.GetCompanyInfoAsync(jobOffer.CompanyId.Value);
+            if (companyInfo == null)
+            {
+                jobOfferDtos.Add(jobOfferDto);
+                continue;
+            }
+             
+            jobOfferDto.CompanyInfo = companyInfo;
+            jobOfferDtos.Add(jobOfferDto);
+        }
         _logger.LogInformation("Récupération de {Count} offres d'emploi", jobOffers.Count);
-        
-        return jobOffers;
+
+        return jobOfferDtos;
     }
 
     public async Task<JobOffer?> GetJobOfferByIdAsync(int id)
@@ -43,7 +65,7 @@ public class JobOfferService : IJobOfferService
             .FirstOrDefaultAsync(j => j.Id == id);
     }
 
-    public async Task<JobOffer> CreateJobOfferAsync(CreateJobOfferDto dto)
+    public async Task<JobOfferDto> CreateJobOfferAsync(CreateJobOfferDto dto)
     {
         _logger.LogInformation("Création d'une nouvelle offre d'emploi: {Title}", dto.Title);
 
@@ -112,8 +134,8 @@ public class JobOfferService : IJobOfferService
         var createdJobOffer = await _jobOfferRepository.CreateJobOfferAsync(jobOffer);
         
         _logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
-        
-        return createdJobOffer;
+        var createdJobOfferDto = JobOfferDto.FromDomain(createdJobOffer, companyInfo); 
+        return createdJobOfferDto;
     }
 
     public async Task<JobOffer?> UpdateJobOfferAsync(int id, CreateJobOfferDto dto)

@@ -18,13 +18,9 @@ public static class CreateJobOffer
 
                 var createdJobOffer = await jobOfferService.CreateJobOfferAsync(createJobOfferDto);
                 
-                // Pour l'instant, on retourne sans enrichissement
-                // Dans une vraie implémentation, on récupérerait les infos d'entreprise
-                var jobOfferDto = JobOfferDto.FromDomain(createdJobOffer);
-
                 logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
 
-                return Results.CreatedAtRoute("GetJobOffers", new { id = createdJobOffer.Id }, jobOfferDto);
+                return Results.CreatedAtRoute("GetJobOffers", new { id = createdJobOffer.Id }, createdJobOffer);
             }
             catch (Exception ex)
             {

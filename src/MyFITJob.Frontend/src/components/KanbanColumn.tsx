@@ -45,7 +45,7 @@ export const KanbanColumn: React.FC<KanbanColumnProps> = ({ title, count, cards 
             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{card.description}</p>
             <div className="mt-2">
               <p className="text-sm font-medium text-gray-700">
-                {card.companyInfo ? card.companyInfo.name : "Entreprise inconnue"}
+                {card.companyInfo ? card.companyInfo.name : "Entreprise inconnue"}  
               </p>
               <p className="text-sm text-gray-500">{card.location}</p>
             </div>

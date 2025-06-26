@@ -17,11 +17,8 @@ public record JobOfferDto
     public List<SkillDto> Skills { get; init; } = new();
     
     // Informations enrichies de l'entreprise
-    public string CompanyName { get; init; } = string.Empty;
-    public string Industry { get; init; } = string.Empty;
-    public string CompanySize { get; init; } = string.Empty;
-    public double CompanyRating { get; init; }
-
+    public CompanyInfo CompanyInfo { get; set; }
+    
     public static JobOfferDto FromDomain(JobOffer jobOffer, CompanyInfo? companyInfo = null)
     {
         return new JobOfferDto
@@ -41,11 +38,7 @@ public record JobOfferDto
             UpdatedAt = jobOffer.UpdatedAt,
             Skills = jobOffer.Skills.Select(s => SkillDto.FromDomain(s)).ToList(),
             
-            // Informations enrichies de l'entreprise
-            CompanyName = companyInfo?.Name ?? "Entreprise inconnue",
-            Industry = companyInfo?.Industry ?? "N/A",
-            CompanySize = companyInfo?.Size ?? "N/A",
-            CompanyRating = companyInfo?.Rating ?? 0.0
+            CompanyInfo = companyInfo ?? CompanyInfo.NullCompanyInfo
         };
     }
 }

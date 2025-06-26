@@ -5,6 +5,6 @@ namespace MyFITJob.Api.JobOffers.Application;
 
 public interface IJobOfferService
 {
-    Task<List<JobOffer>> GetJobOffersAsync(string searchTerm);
-    Task<JobOffer> CreateJobOfferAsync(CreateJobOfferDto dto);
+    Task<List<JobOfferDto>> GetJobOffersAsync(string searchTerm);
+    Task<JobOfferDto> CreateJobOfferAsync(CreateJobOfferDto dto);
 } 

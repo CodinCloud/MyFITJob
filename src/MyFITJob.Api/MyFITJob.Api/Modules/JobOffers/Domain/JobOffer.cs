@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MyFITJob.Api.JobOffers.DTOs;
 
 namespace MyFITJob.Api.JobOffers.Domain;
 

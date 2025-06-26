@@ -55,10 +55,16 @@ export type JobOffer = {
   commentsCount: number;
   skills: Skill[];
   // Informations enrichies de l'entreprise
-  companyName: string;
+  companyInfo: CompanyInfos;
+};
+
+export type CompanyInfos = {
+  id: number;
+  name: string;
+  description: string;
   industry: string;
-  companySize: string;
-  companyRating: number;
+  size: string;
+  rating: number;
 };
 
 export type CreateJobOffer = {

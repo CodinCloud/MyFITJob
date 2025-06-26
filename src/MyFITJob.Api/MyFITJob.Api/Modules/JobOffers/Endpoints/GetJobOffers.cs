@@ -14,13 +14,9 @@ public static class GetJobOffers
         {
             try
             {
-                var allJobOffers = await jobOfferService.GetJobOffersAsync(String.Empty);
+                var allJobOfferDtos = await jobOfferService.GetJobOffersAsync(String.Empty);
                 
-                // Pour l'instant, on retourne les offres sans enrichissement
-                // Dans une vraie implémentation, on enrichirait avec les infos d'entreprise
-                var jobOfferDtos = allJobOffers.Select(jobOffer => JobOfferDto.FromDomain(jobOffer)).ToList();
-                
-                return Results.Ok(jobOfferDtos);
+                return Results.Ok(allJobOfferDtos);
             }
             catch (Exception ex)
             {

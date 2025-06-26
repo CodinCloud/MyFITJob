@@ -44,7 +44,12 @@ router.get('/:id', (req, res) => {
     }
 
     // Retourner l'objet Company complet
-    res.json(company);
+    console.log('📥 GET /api/companies/:id - Payload reçu:', JSON.stringify(company, null, 2));
+    res.json({
+      success: true,
+      data: company
+    });
+
   } catch (error) {
     res.status(500).json({
       success: false,

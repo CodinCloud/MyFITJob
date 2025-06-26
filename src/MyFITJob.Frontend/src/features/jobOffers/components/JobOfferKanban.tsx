@@ -47,12 +47,7 @@ export const JobOfferKanban: React.FC = () => {
             date: new Date(offer.updatedAt).toLocaleDateString(),
             commentsCount: offer.commentsCount,
             skills: offer.skills.map(skill => skill.name).join(', '),
-            companyInfo: {
-              name: offer.companyName,
-              industry: offer.industry,
-              size: offer.companySize,
-              rating: offer.companyRating
-            },
+            companyInfo: offer.companyInfo,
           }))}
         />
       ))}
