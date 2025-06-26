@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using MyFITJob.Api.JobOffers.DTOs;
 
@@ -9,7 +8,6 @@ public class ContactsService : IContactsService
     private readonly HttpClient _httpClient;
     private readonly ILogger<ContactsService> _logger;
     private readonly string _baseUrl;
-    private readonly int _timeoutSeconds;
     private readonly JsonSerializerOptions _jsonOptions;
 
     public ContactsService(
@@ -20,50 +18,40 @@ public class ContactsService : IContactsService
         _httpClient = httpClient;
         _logger = logger;
         _baseUrl = configuration["ContactsApi:BaseUrl"];
-        _timeoutSeconds = int.TryParse(configuration["ContactsApi:TimeoutSeconds"], out var timeout) ? timeout : 30;
-        _httpClient.Timeout = TimeSpan.FromSeconds(_timeoutSeconds);
+
         _jsonOptions = new JsonSerializerOptions
         {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase, 
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
         };
-        _logger.LogInformation("ContactsService initialisé avec BaseUrl: {BaseUrl}, Timeout: {Timeout}s", _baseUrl,
-            _timeoutSeconds);
+        _logger.LogInformation("ContactsService initialisé avec BaseUrl: {BaseUrl}", _baseUrl);
     }
 
     public async Task<CompanyInfo?> GetCompanyInfoAsync(int companyId)
     {
-        try
+        _logger.LogInformation("Récupération des informations de l'entreprise {CompanyId}", companyId);
+
+        var response = await _httpClient.GetAsync($"{_baseUrl}/api/companies/{companyId}");
+
+        if (response.IsSuccessStatusCode)
         {
-            _logger.LogInformation("Récupération des informations de l'entreprise {CompanyId}", companyId);
+            var content = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ContactsApiResponse<CompanyInfo>>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            var response = await _httpClient.GetAsync($"{_baseUrl}/api/companies/{companyId}");
-
-            if (response.IsSuccessStatusCode)
+            if (apiResponse?.Success == true && apiResponse.Data != null)
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var apiResponse = JsonSerializer.Deserialize<ContactsApiResponse<CompanyInfo>>(content,
-                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                if (apiResponse?.Success == true && apiResponse.Data != null)
-                {
-                    _logger.LogInformation("Informations de l'entreprise récupérées avec succès: {CompanyName}",
-                        apiResponse.Data.Name);
-                    return apiResponse.Data;
-                }
+                _logger.LogInformation("Informations de l'entreprise récupérées avec succès: {CompanyName}",
+                    apiResponse.Data.Name);
+                return apiResponse.Data;
             }
+        }
 
-            _logger.LogWarning(
-                "Impossible de récupérer les informations de l'entreprise {CompanyId}. Status: {StatusCode}", companyId,
-                response.StatusCode);
-            return null;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erreur lors de la récupération des informations de l'entreprise {CompanyId}",
-                companyId);
-            return null;
-        }
+        _logger.LogWarning(
+            "Impossible de récupérer les informations de l'entreprise {CompanyId}. Status: {StatusCode}", companyId,
+            response.StatusCode);
+
+        return null;
     }
 
     public async Task<CompanyInfo> CreateCompanyAsync(CreateCompanyDto companyDto)
@@ -71,7 +59,7 @@ public class ContactsService : IContactsService
         try
         {
             _logger.LogInformation("Création d'une nouvelle entreprise: {CompanyName}", companyDto.Name);
-         
+
             var response = await _httpClient.PostAsJsonAsync($"{_baseUrl}/api/companies", companyDto,
                 _jsonOptions);
 
