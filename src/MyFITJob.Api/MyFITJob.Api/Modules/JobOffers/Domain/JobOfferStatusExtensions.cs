@@ -1,4 +1,5 @@
 using System.Reflection;
+using MyFITJob.Api.Kernel.Domain;
 
 namespace MyFITJob.Api.JobOffers.Domain;
 

@@ -38,6 +38,7 @@
 
     <ItemGroup>
       <Folder Include="Infrastructure\Configuration\" />
+      <Folder Include="Modules\" />
     </ItemGroup>
 
 </Project>
