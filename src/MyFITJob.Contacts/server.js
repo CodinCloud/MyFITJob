@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const companiesRouter = require('./routes/companies');
+const { initializeData } = require('./data/companies');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -74,9 +75,22 @@ app.use('*', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT}`);
-  console.log(`📊 Health check: http://localhost:${PORT}/health`);
-  console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
-  console.log(`📖 API Documentation: http://localhost:${PORT}/`);
-}); 
+// Initialiser les données et démarrer le serveur
+async function startServer() {
+  try {
+    // Initialiser les données persistantes
+    await initializeData();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
+      console.log(`📖 API Documentation: http://localhost:${PORT}/`);
+    });
+  } catch (error) {
+    console.error('❌ Erreur lors du démarrage du serveur:', error);
+    process.exit(1);
+  }
+}
+
+startServer(); 

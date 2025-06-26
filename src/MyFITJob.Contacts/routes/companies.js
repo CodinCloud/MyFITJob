@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { getCompanyById, getAllCompanies, createCompany, getCompanyByName } = require('../data/companies');
+const { getCompanyById, getAllCompanies, createCompany, getCompanyByName, initializeData } = require('../data/companies');
 
 // GET /api/companies - Récupérer toutes les companies
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const companies = getAllCompanies();
     res.json({
@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
 });
 
 // GET /api/companies/:id - Récupérer une company par ID
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const companyId = parseInt(req.params.id);
     
@@ -60,7 +60,7 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/companies - Créer une nouvelle company
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const companyData = req.body;
     
@@ -76,6 +76,7 @@ router.post('/', (req, res) => {
         message: 'Request body is required'
       });
     }
+    
     const existing = getCompanyByName(companyData.name);
     if (existing) {
       console.error('Company already exists, we return it:', companyData.name);
@@ -86,7 +87,7 @@ router.post('/', (req, res) => {
       })
     }
     
-    const newCompany = createCompany(companyData);
+    const newCompany = await createCompany(companyData);
     
     console.log('✅ Company créée avec succès:', JSON.stringify(newCompany, null, 2));
 
