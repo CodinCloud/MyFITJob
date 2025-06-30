@@ -1,4 +1,5 @@
 const amqp = require('amqplib');
+const Company = require('../models/Company');
 
 /**
  * Consumer pour traiter les événements "JobOfferCreated"
@@ -22,6 +23,9 @@ class JobOfferCreatedConsumer {
     async initialize() {
         try {
             console.log('🔌 Connexion à RabbitMQ...');
+            
+            // Attendre un peu pour laisser RabbitMQ finir de démarrer
+            await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Établir la connexion à RabbitMQ
             this.connection = await amqp.connect(this.rabbitMqUrl);
@@ -77,25 +81,39 @@ class JobOfferCreatedConsumer {
             
             console.log(`🏢 Création automatique de l'entreprise: ${companyName}`);
             
-            // Créer automatiquement l'entreprise dans la base de données
-            // Note: Ici on simule la création, en réalité vous importeriez vos services
+            // Vérifier si l'entreprise existe déjà
+            const existingCompany = await Company.findByName(companyName);
+            
+            if (existingCompany) {
+                console.log(`ℹ️ Entreprise "${companyName}" existe déjà (ID: ${existingCompany.id})`);
+                return;
+            }
+            
+            // Créer automatiquement l'entreprise dans MongoDB
             const companyData = {
                 name: companyName,
                 industry: industry || 'Unknown',
-                size: size || '1-50', // Utilise la taille de l'offre d'emploi
+                size: size || '1-50',
                 rating: 0,
                 description: `Entreprise créée automatiquement pour l'offre ${jobOfferId}`
             };
             
-            // TODO: Importer et utiliser votre service de création d'entreprise
-            // const { createCompany } = require('../services/companyService');
-            // await createCompany(companyData);
+            const newCompany = new Company(companyData);
+            await newCompany.save();
             
-            console.log(`✅ Entreprise "${companyName}" créée automatiquement pour l'offre ${jobOfferId}`);
+            console.log(`✅ Entreprise "${companyName}" créée automatiquement en MongoDB (ID: ${newCompany.id})`);
             console.log(`📊 Détails: Industry=${industry}, Size=${size}`);
             
         } catch (error) {
             console.error('❌ Erreur lors du traitement du message:', error);
+            
+            // Gestion spécifique des erreurs MongoDB
+            if (error.name === 'ValidationError') {
+                console.error('❌ Erreur de validation MongoDB:', error.message);
+            } else if (error.code === 11000) {
+                console.log('ℹ️ Entreprise déjà existante (contrainte d\'unicité)');
+            }
+            
             throw error; // Relancer l'erreur pour que le consumer la gère
         }
     }

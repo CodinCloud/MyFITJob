@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const companiesRouter = require('./routes/companies');
-const { initializeData } = require('./data/companies');
+const database = require('./config/database');
 const JobOfferCreatedConsumer = require('./consumers/JobOfferCreatedConsumer');
 
 const app = express();
@@ -19,10 +19,16 @@ app.use('/api/companies', companiesRouter);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  const dbStatus = database.getConnectionStatus();
+  
   res.json({ 
     status: 'OK', 
     service: 'MyFITJob.Contacts',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    database: {
+      connected: dbStatus.isConnected,
+      readyState: dbStatus.readyState
+    }
   });
 });
 
@@ -30,33 +36,9 @@ app.get('/health', (req, res) => {
 app.get('/', (req, res) => {
   res.json({
     service: 'MyFITJob.Contacts',
-    version: '1.0.0',
-    description: 'REST API for company information management',
-    endpoints: {
-      health: '/health',
-      companies: {
-        getAll: 'GET /api/companies',
-        getById: 'GET /api/companies/:id',
-        create: 'POST /api/companies',
-        metadata: {
-          industries: 'GET /api/companies/metadata/industries',
-          sizes: 'GET /api/companies/metadata/sizes'
-        }
-      }
-    },
-    examples: {
-      createCompany: {
-        method: 'POST',
-        url: '/api/companies',
-        body: {
-          name: 'New Company',
-          industry: 'Tech',
-          size: '51-200',
-          rating: 4.5,
-          description: 'Company description'
-        }
-      }
-    }
+    version: '2.0.0',
+    description: 'REST API for company information management with MongoDB',
+    database: 'MongoDB',
   });
 });
 
@@ -79,15 +61,36 @@ app.use('*', (req, res) => {
   });
 });
 
+// Fonction utilitaire pour retry avec délai exponentiel
+async function retryWithBackoff(fn, maxRetries = 5, baseDelay = 1000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries) {
+        throw error;
+      }
+      
+      const delay = baseDelay * Math.pow(2, attempt - 1);
+      console.log(`⏳ Tentative ${attempt}/${maxRetries} échouée, retry dans ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 // Initialiser les données et démarrer le serveur
 async function startServer() {
   try {
-    // Initialiser les données persistantes
-    await initializeData();
+    // Connexion à MongoDB
+    await database.connect();
     
-    // Initialiser le consumer RabbitMQ
+    // Initialiser le consumer RabbitMQ avec retry
     jobOfferConsumer = new JobOfferCreatedConsumer();
-    await jobOfferConsumer.initialize();
+    await retryWithBackoff(
+      () => jobOfferConsumer.initialize(),
+      5, // 5 tentatives maximum
+      2000 // 2 secondes de délai initial
+    );
     
     app.listen(PORT, () => {
       console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT}`);
@@ -95,10 +98,19 @@ async function startServer() {
       console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
       console.log(`📖 API Documentation: http://localhost:${PORT}/`);
       console.log(`🐰 RabbitMQ Consumer: En attente de messages...`);
+      console.log(`🍃 MongoDB: Connecté et opérationnel`);
     });
   } catch (error) {
     console.error('❌ Erreur lors du démarrage du serveur:', error);
-    process.exit(1);
+    
+    // Tenter de démarrer le serveur même si RabbitMQ n'est pas disponible
+    console.log('🔄 Démarrage du serveur sans RabbitMQ...');
+    app.listen(PORT, () => {
+      console.log(`🚀 MyFITJob.Contacts microservice running on port ${PORT} (sans RabbitMQ)`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+      console.log(`🏢 Companies API: http://localhost:${PORT}/api/companies`);
+      console.log(`⚠️  RabbitMQ: Non disponible`);
+    });
   }
 }
 
@@ -113,6 +125,9 @@ process.on('SIGINT', async () => {
     await jobOfferConsumer.close();
   }
   
+  // Fermer la connexion MongoDB
+  await database.disconnect();
+  
   process.exit(0);
 });
 
@@ -123,6 +138,9 @@ process.on('SIGTERM', async () => {
   if (jobOfferConsumer) {
     await jobOfferConsumer.close();
   }
+  
+  // Fermer la connexion MongoDB
+  await database.disconnect();
   
   process.exit(0);
 }); 

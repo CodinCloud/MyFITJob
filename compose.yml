@@ -30,6 +30,7 @@ services:
       - RabbitMQ__ServiceName=MyFITJob.Api
     depends_on:
       - db
+      - rabbitmq
 
   frontend:
     build:
@@ -43,6 +44,8 @@ services:
     command: npm run dev -- --host 0.0.0.0
     environment:
       NODE_ENV: development
+    depends_on:
+      - rabbitmq
 
   contacts:
     build:
@@ -54,10 +57,16 @@ services:
       NODE_ENV: production
       DATA_DIR: /app/data
       RABBITMQ_URL: amqp://rabbitmq:5672
+      MONGODB_URI: mongodb://admin:adminpass@mongodb:27017/contactsdb?authSource=admin
+      MONGODB_DATABASE: contactsdb
     volumes:
       - contacts_data:/app/data
     depends_on:
-      - rabbitmq
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -74,14 +83,39 @@ services:
 
 # Message Broker 
   rabbitmq:
-    image: rabbitmq:management-alpine
+    image: rabbitmq:3-management
     container_name: myfitjob-rabbitmq
     ports:
       - "5672:5672" # Queue 
       - "15672:15672" # Portail web
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
-    hostname: rabbitmq 
+    hostname: rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 30s
+      retries: 3
+
+# Base de données MongoDB pour les Contacts
+  mongodb:
+    image: mongo:7.0
+    container_name: myfitjob-mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: adminpass
+      MONGO_INITDB_DATABASE: contactsdb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./src/MyFITJob.Contacts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/contactsdb --quiet
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 # Monitoring
   prometheus:
@@ -173,3 +207,4 @@ volumes:
   grafana_data:
   contacts_data: 
   rabbitmq_data:
+  mongodb_data:
