@@ -40,8 +40,8 @@ companySchema.index({ industry: 1 });
 companySchema.methods.toJSON = function() {
   const company = this.toObject();
   
-  // Renommer _id en id pour compatibilité avec l'API existante
-  company.id = company._id;
+  // Utiliser _id comme identifiant principal
+  company.id = company._id.toString();
   delete company._id;
   delete company.__v;
   

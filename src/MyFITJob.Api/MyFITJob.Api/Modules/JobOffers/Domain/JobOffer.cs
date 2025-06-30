@@ -10,7 +10,7 @@ public class JobOffer
     [Required]
     public string Title { get; set; } = string.Empty;
 
-    public int? CompanyId { get; set; } 
+    public string? CompanyId { get; set; } 
 
     [Required]
     public string Location { get; set; } = string.Empty;

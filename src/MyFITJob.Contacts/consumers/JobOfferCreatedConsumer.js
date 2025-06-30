@@ -15,7 +15,7 @@ class JobOfferCreatedConsumer {
         this.publisher = null;
         this.queueName = 'job-offer-created';
         this.rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
-        this.exchangeName = 'MyFITJob.Api.Messaging.Contracts:JobOfferCreated';
+        this.exchangeName = 'MyFITJob.Api.Messaging.Contracts:JobOfferCreatedEvent';
         this.exchangeType = 'fanout';
     }
 

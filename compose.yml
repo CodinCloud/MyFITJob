@@ -64,6 +64,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -75,6 +76,7 @@ services:
     depends_on:
       - frontend
       - backend
+      - contacts
     cpus: 0.2
     mem_limit: 128m
 
@@ -92,7 +94,7 @@ services:
       test: rabbitmq-diagnostics -q ping
       interval: 5s
       timeout: 5s
-      retries: 1
+      retries: 3
 
 # Base de données MongoDB pour les Contacts
   mongodb:

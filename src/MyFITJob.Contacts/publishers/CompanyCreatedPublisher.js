@@ -4,10 +4,12 @@
  * Ce publisher diffuse un message RabbitMQ quand une entreprise est créée
  * pour informer les autres microservices (MyFITJob.Api, Frontend)
  */
+const crypto = require('crypto');
+
 class CompanyCreatedPublisher {
     constructor(channel) {
         this.channel = channel;
-        this.exchangeName = 'MyFITJob.Contacts.Messaging.Contracts:CompanyCreated';
+        this.exchangeName = 'MyFITJob.Api.Messaging.Contracts:CompanyCreatedEvent';
         this.exchangeType = 'fanout';
     }
 
@@ -36,7 +38,7 @@ class CompanyCreatedPublisher {
                 messageId: this.generateMessageId(),
                 timestamp: new Date().toISOString(),
                 messageType: [
-                    "urn:message:MyFITJob.Contacts.Messaging.Contracts:CompanyCreated"
+                    "urn:message:MyFITJob.Api.Messaging.Contracts:CompanyCreatedEvent"
                 ],
                 message: {
                     companyId: companyData.id || companyData._id.toString(),
@@ -55,7 +57,7 @@ class CompanyCreatedPublisher {
                 contentType: 'application/json'
             });
 
-            console.log(`📤 Événement CompanyCreated publié:`);
+            console.log(`📤 Événement CompanyCreatedEvent publié:`);
             console.log(`   🏢 Company: ${event.message.companyName} (ID: ${event.message.companyId})`);
             console.log(`   💼 JobOffer: ${event.message.jobOfferId}`);
             console.log(`   🏭 Industry: ${event.message.industry}`);
@@ -67,10 +69,11 @@ class CompanyCreatedPublisher {
     }
 
     /**
-     * Génère un ID unique pour le message
+     * Génère un ID unique pour le message au format GUID compatible MassTransit
      */
     generateMessageId() {
-        return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        // Utilise la méthode native Node.js pour générer un UUID v4
+        return crypto.randomUUID();
     }
 }
 

@@ -41,13 +41,13 @@ public class JobOfferService : IJobOfferService
             var jobOfferDto = JobOfferDto.FromDomain(jobOffer);
             jobOfferDto.CompanyInfo = CompanyInfo.NullCompanyInfo; 
             
-            if (!jobOffer.CompanyId.HasValue)
+            if (String.IsNullOrEmpty(jobOffer.CompanyId = null))
             {
                 jobOfferDtos.Add(jobOfferDto);
                 continue;
             }
             
-            var companyInfo = await _contactsService.GetCompanyInfoAsync(jobOffer.CompanyId.Value);
+            var companyInfo = await _contactsService.GetCompanyInfoAsync(jobOffer.CompanyId);
             if (companyInfo == null)
             {
                 jobOfferDtos.Add(jobOfferDto);
@@ -73,21 +73,6 @@ public class JobOfferService : IJobOfferService
     {
         _logger.LogInformation("Création d'une nouvelle offre d'emploi: {Title}", dto.Title);
 
-        /*
-        var createCompanyDto = new CreateCompanyDto
-        {
-            Name = dto.Company,
-            Industry = "Tech", // Valeur par défaut
-            Size = "51-200",   // Valeur par défaut
-            Description = $"Entreprise pour l'offre: {dto.Title}"
-        };
-
-        CompanyInfo companyInfo = await _contactsService.CreateCompanyAsync(createCompanyDto);
-        
-        _logger.LogInformation("Entreprise créée/récupérée avec succès: {CompanyName}", companyInfo.Name);
-
-        */
-        
         // Créer l'offre d'emploi
         var jobOffer = new JobOffer
         {
@@ -140,7 +125,7 @@ public class JobOfferService : IJobOfferService
         var createdJobOffer = await _jobOfferRepository.CreateJobOfferAsync(jobOffer);
         
         // Créer ou récupérer l'entreprise via l'API Contacts
-        await _publishEndpoint.Publish(new JobOfferCreated(createdJobOffer.Id, dto.Company, "Tech", "10-150"));
+        await _publishEndpoint.Publish(new JobOfferCreatedEvent(createdJobOffer.Id, dto.Company, "Tech", "10-150"));
         
         _logger.LogInformation("Offre d'emploi créée avec succès. ID: {JobOfferId}", createdJobOffer.Id);
         var createdJobOfferDto = JobOfferDto.FromDomain(createdJobOffer); 

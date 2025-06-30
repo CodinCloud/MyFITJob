@@ -27,7 +27,7 @@ public class ContactsService : IContactsService
         _logger.LogInformation("ContactsService initialisé avec BaseUrl: {BaseUrl}", _baseUrl);
     }
 
-    public async Task<CompanyInfo?> GetCompanyInfoAsync(int companyId)
+    public async Task<CompanyInfo?> GetCompanyInfoAsync(string companyId)
     {
         _logger.LogInformation("Récupération des informations de l'entreprise {CompanyId}", companyId);
 

@@ -53,9 +53,6 @@ services:
       RABBITMQ_URL: amqp://rabbitmq:5672
       MONGODB_URI: mongodb://admin:adminpass@mongodb:27017/contactsdb?authSource=admin
       MONGODB_DATABASE: contactsdb
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
 
   # Override de nginx pour le développement
   nginx:

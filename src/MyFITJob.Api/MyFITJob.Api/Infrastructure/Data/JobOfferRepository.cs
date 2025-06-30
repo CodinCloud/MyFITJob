@@ -12,6 +12,11 @@ public class JobOfferRepository : IJobOfferRepository
         _context = context;
     }
 
+    public Task<JobOffer?> GetJobOfferAsync(int id)
+    {
+        return _context.JobOffers.FirstOrDefaultAsync(jo => jo.Id == id);
+    }
+
     public async Task<List<JobOffer>> GetJobOffersAsync(string searchTerm)
     {
         var query = _context.JobOffers
@@ -32,6 +37,13 @@ public class JobOfferRepository : IJobOfferRepository
     public async Task<JobOffer> CreateJobOfferAsync(JobOffer jobOffer)
     {
         _context.JobOffers.Add(jobOffer);
+        await _context.SaveChangesAsync();
+        return jobOffer;
+    }
+
+    public async Task<JobOffer> UpdateJobOfferAsync(JobOffer jobOffer)
+    {
+        _context.Update(jobOffer);
         await _context.SaveChangesAsync();
         return jobOffer;
     }

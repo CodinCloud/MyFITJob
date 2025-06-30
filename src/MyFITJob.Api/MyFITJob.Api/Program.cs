@@ -37,18 +37,19 @@ builder.Services.AddCors((options) =>
         });
 });
 
-builder.Services.AddMassTransit(x =>
+builder.Services.AddMassTransit(busConfigurator =>
 {
-    x.SetKebabCaseEndpointNameFormatter();
-    x.UsingRabbitMq((context, cfg) =>
+    busConfigurator.SetKebabCaseEndpointNameFormatter();
+    busConfigurator.UsingRabbitMq((context, cfg) =>
     {
        var rabbitMqHost = builder.Configuration["RabbitMQ:Host"]!;
        Console.WriteLine($"Connecting to RabbitMQ at: {rabbitMqHost}");
        
        cfg.Host(new Uri(rabbitMqHost));
-       
        cfg.ConfigureEndpoints(context);
-    });    
+    });
+
+    busConfigurator.AddConsumer<CompanyCreatedConsumer>();
 });
 
 builder.Services.AddMassTransitHostedService();
