@@ -5,6 +5,7 @@ const companySchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, 'Le nom de l\'entreprise est obligatoire'],
+    unique: true,
     trim: true
   },
   industry: {

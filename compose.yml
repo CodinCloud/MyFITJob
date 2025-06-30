@@ -64,9 +64,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongodb:
-        condition: service_healthy
-    restart: unless-stopped
 
   nginx:
     image: nginx:latest
@@ -93,9 +90,9 @@ services:
     hostname: rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 30s
-      timeout: 30s
-      retries: 3
+      interval: 5s
+      timeout: 5s
+      retries: 1
 
 # Base de données MongoDB pour les Contacts
   mongodb:
@@ -111,11 +108,6 @@ services:
     volumes:
       - mongodb_data:/data/db
       - ./src/MyFITJob.Contacts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/contactsdb --quiet
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 # Monitoring
   prometheus:

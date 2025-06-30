@@ -56,8 +56,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-      mongodb:
-        condition: service_healthy
 
   # Override de nginx pour le développement
   nginx:

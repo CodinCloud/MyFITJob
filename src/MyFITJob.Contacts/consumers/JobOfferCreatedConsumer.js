@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
 const Company = require('../models/Company');
+const CompanyCreatedPublisher = require('../publishers/CompanyCreatedPublisher');
 
 /**
  * Consumer pour traiter les événements "JobOfferCreated"
@@ -11,6 +12,7 @@ class JobOfferCreatedConsumer {
     constructor() {
         this.connection = null;
         this.channel = null;
+        this.publisher = null;
         this.queueName = 'job-offer-created';
         this.rabbitMqUrl = process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672';
         this.exchangeName = 'MyFITJob.Api.Messaging.Contracts:JobOfferCreated';
@@ -32,6 +34,10 @@ class JobOfferCreatedConsumer {
             
             // Créer un canal de communication
             this.channel = await this.connection.createChannel();
+            
+            // Initialiser le publisher avec le même canal
+            this.publisher = new CompanyCreatedPublisher(this.channel);
+            await this.publisher.initialize();
             
             // Déclarer l'exchange MassTransit (fanout)
             await this.channel.assertExchange(this.exchangeName, this.exchangeType, { durable: true });
@@ -79,30 +85,36 @@ class JobOfferCreatedConsumer {
             // MassTransit encapsule le message métier dans la propriété "message"
             const { jobOfferId, companyName, industry, size } = jobOfferData.message;
             
-            console.log(`🏢 Création automatique de l'entreprise: ${companyName}`);
+            console.log(`🏢 Traitement de l'entreprise: ${companyName} pour l'offre ${jobOfferId}`);
             
             // Vérifier si l'entreprise existe déjà
             const existingCompany = await Company.findByName(companyName);
             
+            let companyToPublish;
+            
             if (existingCompany) {
                 console.log(`ℹ️ Entreprise "${companyName}" existe déjà (ID: ${existingCompany.id})`);
-                return;
+                companyToPublish = existingCompany;
+            } else {
+                // Créer automatiquement l'entreprise dans MongoDB
+                const companyData = {
+                    name: companyName,
+                    industry: industry || 'Unknown',
+                    size: size || '1-50',
+                    rating: 0,
+                    description: `Entreprise créée automatiquement pour l'offre ${jobOfferId}`
+                };
+                
+                const newCompany = new Company(companyData);
+                await newCompany.save();
+                
+                console.log(`✅ Entreprise "${companyName}" créée automatiquement en MongoDB (ID: ${newCompany.id})`);
+                console.log(`📊 Détails: Industry=${industry}, Size=${size}`);
+                companyToPublish = newCompany;
             }
             
-            // Créer automatiquement l'entreprise dans MongoDB
-            const companyData = {
-                name: companyName,
-                industry: industry || 'Unknown',
-                size: size || '1-50',
-                rating: 0,
-                description: `Entreprise créée automatiquement pour l'offre ${jobOfferId}`
-            };
-            
-            const newCompany = new Company(companyData);
-            await newCompany.save();
-            
-            console.log(`✅ Entreprise "${companyName}" créée automatiquement en MongoDB (ID: ${newCompany.id})`);
-            console.log(`📊 Détails: Industry=${industry}, Size=${size}`);
+            // Publier TOUJOURS l'événement CompanyCreated (création OU entreprise existante)
+            await this.publisher.publishCompanyCreated(companyToPublish, jobOfferId);
             
         } catch (error) {
             console.error('❌ Erreur lors du traitement du message:', error);
