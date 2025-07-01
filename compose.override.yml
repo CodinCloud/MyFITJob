@@ -54,6 +54,24 @@ services:
       MONGODB_URI: mongodb://admin:adminpass@mongodb:27017/contactsdb?authSource=admin
       MONGODB_DATABASE: contactsdb
 
+  # Override du service identity pour le hot reload
+  identity:
+    build:
+      context: ./src/MyFITJob.Identity
+      dockerfile: Dockerfile
+      target: build  # Utilise la target build pour le développement
+    volumes:
+      - ./src/MyFITJob.Identity:/src
+      - ~/.nuget/packages:/root/.nuget/packages  # cache NuGet
+    ports:
+      - "5001:80"  # Expose sur le port 5001
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__MongoDB=mongodb://admin:adminpass@mongodb:27017/identitydb?authSource=admin
+      - MongoDbSettings__DatabaseName=identitydb
+    depends_on:
+      - mongodb
+
   # Override de nginx pour le développement
   nginx:
     volumes:
