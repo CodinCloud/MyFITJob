@@ -14,8 +14,6 @@ public record LoginResponse(
     string UserId,
     string Username,
     string Email,
-    string FirstName,
-    string LastName,
     List<string> Roles
 );
 
@@ -35,11 +33,6 @@ public record UserDto(
     string Id,
     string Username,
     string Email,
-    string FirstName,
-    string LastName,
-    DateTime CreatedAt,
-    DateTime? LastLoginAt,
-    bool IsActive,
     List<string> Roles
 );
 

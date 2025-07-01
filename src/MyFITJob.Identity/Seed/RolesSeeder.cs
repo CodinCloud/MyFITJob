@@ -10,7 +10,7 @@ public static class RolesSeeder
     public static async Task SeedRolesAsync(IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
-        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
 
         var roles = new[] { "Student", "Recruiter", "Admin" };
@@ -19,7 +19,8 @@ public static class RolesSeeder
         {
             if (!await roleManager.RoleExistsAsync(role))
             {
-                var result = await roleManager.CreateAsync(new IdentityRole(role));
+                var addingRole = new ApplicationRole() { Name = role, };
+                var result = await roleManager.CreateAsync(addingRole);
                 if (result.Succeeded)
                 {
                     logger.LogInformation("Role {Role} created successfully", role);
@@ -47,22 +48,23 @@ public static class RolesSeeder
             {
                 UserName = "admin",
                 Email = adminEmail,
-                FirstName = "Admin",
-                LastName = "User",
                 EmailConfirmed = true,
-                IsActive = true
             };
 
-            var result = await userManager.CreateAsync(adminUser, "admin");
+            var result = await userManager.CreateAsync(adminUser, "admin123");
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
-                logger.LogInformation("Default admin user created successfully");
+                logger.LogInformation("Default admin user created successfully with email: {Email}", adminEmail);
             }
             else
             {
                 logger.LogError("Failed to create default admin user: {Errors}", string.Join(", ", result.Errors.Select(e => e.Description)));
             }
+        }
+        else
+        {
+            logger.LogInformation("Admin user already exists with email: {Email}", adminEmail);
         }
     }
 } 

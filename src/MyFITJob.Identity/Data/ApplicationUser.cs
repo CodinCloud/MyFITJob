@@ -1,12 +1,10 @@
-using Microsoft.AspNetCore.Identity;
+using AspNetCore.Identity.MongoDbCore.Models;
+using MongoDbGenericRepository.Attributes;
 
 namespace MyFITJob.Identity.Data;
 
-public class ApplicationUser : IdentityUser
+[CollectionName("Users")]
+public class ApplicationUser : MongoIdentityUser<Guid>
 {
-    public string FirstName { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    public DateTime? LastLoginAt { get; set; }
-    public bool IsActive { get; set; } = true;
+
 } 

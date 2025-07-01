@@ -25,17 +25,16 @@ public class JwtTokenGenerator
         var roles = await _userManager.GetRolesAsync(user);
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Id),
-            new(ClaimTypes.Name, user.UserName ?? string.Empty),
-            new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new("FirstName", user.FirstName),
-            new("LastName", user.LastName)
+            new("sub", user.Id.ToString()),           // Subject (ID utilisateur)
+            new("name", user.UserName ?? string.Empty), // Nom d'utilisateur
+            new("email", user.Email ?? string.Empty),   // Email
+            new("user_id", user.Id.ToString()),        // ID utilisateur (pour compatibilité)
         };
 
         // Ajouter les rôles aux claims
         foreach (var role in roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim("role", role));
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));

@@ -30,14 +30,9 @@ public class UsersController : ControllerBase
         {
             var roles = await _userManager.GetRolesAsync(user);
             userDtos.Add(new UserDto(
-                user.Id,
+                user.Id.ToString(),
                 user.UserName ?? string.Empty,
                 user.Email ?? string.Empty,
-                user.FirstName,
-                user.LastName,
-                user.CreatedAt,
-                user.LastLoginAt,
-                user.IsActive,
                 roles.ToList()
             ));
         }
@@ -56,14 +51,9 @@ public class UsersController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
         return Ok(new UserDto(
-            user.Id,
+            user.Id.ToString(),
             user.UserName ?? string.Empty,
             user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
-            user.CreatedAt,
-            user.LastLoginAt,
-            user.IsActive,
             roles.ToList()
         ));
     }
@@ -87,10 +77,7 @@ public class UsersController : ControllerBase
         {
             UserName = request.Username,
             Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
             EmailConfirmed = true,
-            IsActive = true
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -106,14 +93,9 @@ public class UsersController : ControllerBase
         _logger.LogInformation("Admin created user {Username}", user.UserName);
 
         return CreatedAtAction(nameof(GetUserById), new { id = user.Id }, new UserDto(
-            user.Id,
+            user.Id.ToString(),
             user.UserName ?? string.Empty,
             user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
-            user.CreatedAt,
-            user.LastLoginAt,
-            user.IsActive,
             roles.ToList()
         ));
     }
@@ -129,9 +111,6 @@ public class UsersController : ControllerBase
 
         user.Email = request.Email;
         user.UserName = request.Email; // Pour simplifier, on utilise l'email comme username
-        user.FirstName = request.FirstName;
-        user.LastName = request.LastName;
-        user.IsActive = request.IsActive;
 
         var result = await _userManager.UpdateAsync(user);
         if (!result.Succeeded)

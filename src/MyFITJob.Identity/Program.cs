@@ -6,6 +6,9 @@ using MyFITJob.Identity.Infrastructure;
 using MyFITJob.Identity.Seed;
 using MyFITJob.Identity.Settings;
 using System.Text;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Serializers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,21 +16,30 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 
-// Identity avec MongoDB
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
+
+// Configuration des règles de mot de passe plus souples pour l'apprentissage
+builder.Services.Configure<IdentityOptions>(options =>
 {
-    // Configuration simple pour la démo
-    options.Password.RequireDigit = false;
-    options.Password.RequireLowercase = false;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 3;
-})
-.AddMongoDbStores(
-    builder.Configuration.GetConnectionString("MongoDB")!,
-    builder.Configuration.GetSection("MongoDbSettings:DatabaseName").Value!
-)
-.AddDefaultTokenProviders();
+    // Règles de mot de passe simplifiées pour les étudiants
+    options.Password.RequireDigit = false;           // Pas besoin de chiffres
+    options.Password.RequireLowercase = false;       // Pas besoin de minuscules
+    options.Password.RequireNonAlphanumeric = false; // Pas besoin de caractères spéciaux
+    options.Password.RequireUppercase = false;       // Pas besoin de majuscules
+    options.Password.RequiredLength = 3;             // Minimum 3 caractères seulement
+    options.Password.RequiredUniqueChars = 0;        // Pas de caractères uniques requis
+
+    // Règles de nom d'utilisateur
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+});
+
+builder.Services.AddDefaultIdentity<ApplicationUser>()
+    .AddRoles<ApplicationRole>()
+    .AddMongoDbStores<ApplicationUser, ApplicationRole, Guid>(
+        builder.Configuration.GetConnectionString("MongoDB")!,
+        builder.Configuration.GetSection("MongoDbSettings:DatabaseName").Value!
+        );
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
@@ -49,8 +61,14 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtSettings.Audience,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero
+        ClockSkew = TimeSpan.Zero,
+        // Remapping des claims legacy vers des noms plus modernes
+        NameClaimType = "name",
+        RoleClaimType = "role"
     };
+    
+    // Configuration des claims pour éviter les URLs XML longues
+    options.MapInboundClaims = false;
 });
 
 // Services
@@ -78,8 +96,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
-    // .NET 9 utilise automatiquement la découverte d'API native
-    // La documentation sera disponible sur /api-docs
+
 }
 
 app.UseHttpsRedirection();

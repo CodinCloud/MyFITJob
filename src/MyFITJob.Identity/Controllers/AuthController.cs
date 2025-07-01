@@ -37,19 +37,12 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid username or password" });
         }
 
-        if (!user.IsActive)
-        {
-            return Unauthorized(new { message = "Account is deactivated" });
-        }
-
         var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
         if (!result.Succeeded)
         {
             return Unauthorized(new { message = "Invalid username or password" });
         }
 
-        // Mettre à jour la dernière connexion
-        user.LastLoginAt = DateTime.UtcNow;
         await _userManager.UpdateAsync(user);
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -62,11 +55,9 @@ public class AuthController : ControllerBase
             accessToken,
             refreshToken,
             DateTime.UtcNow.AddMinutes(60), // Expiration du token
-            user.Id,
+            user.Id.ToString(),
             user.UserName ?? string.Empty,
             user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
             roles.ToList()
         ));
     }
@@ -91,10 +82,7 @@ public class AuthController : ControllerBase
         {
             UserName = request.Username,
             Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
             EmailConfirmed = true, // Pour la démo
-            IsActive = true
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
@@ -116,11 +104,9 @@ public class AuthController : ControllerBase
             accessToken,
             refreshToken,
             DateTime.UtcNow.AddMinutes(60),
-            user.Id,
+            user.Id.ToString(),
             user.UserName ?? string.Empty,
             user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
             roles.ToList()
         ));
     }
@@ -137,7 +123,8 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<ActionResult<UserDto>> GetCurrentUser()
     {
-        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        // Utiliser les nouveaux noms de claims au lieu des ClaimTypes legacy
+        var userId = User.FindFirst("sub")?.Value ?? User.FindFirst("user_id")?.Value;
         if (string.IsNullOrEmpty(userId))
         {
             return Unauthorized();
@@ -152,14 +139,9 @@ public class AuthController : ControllerBase
         var roles = await _userManager.GetRolesAsync(user);
 
         return Ok(new UserDto(
-            user.Id,
+            user.Id.ToString(),
             user.UserName ?? string.Empty,
             user.Email ?? string.Empty,
-            user.FirstName,
-            user.LastName,
-            user.CreatedAt,
-            user.LastLoginAt,
-            user.IsActive,
             roles.ToList()
         ));
     }
