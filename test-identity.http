@@ -1,0 +1,40 @@
+### 🔐 Test du serveur d'identité MyFITJob
+### Utilisez ce fichier avec l'extension "REST Client" dans VS Code ou importez dans Postman
+
+@baseUrl = http://localhost:5001
+@contentType = application/json
+
+### 1. Connexion avec l'admin par défaut
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+### 2. Récupérer les informations de l'utilisateur connecté
+### Remplacez YOUR_TOKEN par le token reçu de la requête précédente
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer YOUR_TOKEN
+
+### 3. Créer un nouvel utilisateur étudiant
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "username": "student1",
+  "email": "student1@example.com",
+  "password": "test123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+
+### 4. Connexion avec le nouvel utilisateur
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "username": "student1",
+  "password": "test123"
+} 

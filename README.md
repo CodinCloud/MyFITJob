@@ -1,4 +1,64 @@
-# MyFITJob - Cours 2: Contextualize
+# MyFITJob - Plateforme de Microservices
+
+## 🚀 Démarrage rapide
+
+### 1. Démarrer MongoDB pour l'Identity Server
+```bash
+docker run -d \
+  --name myfitjob-mongodb \
+  -p 27017:27017 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=adminpass \
+  -e MONGO_INITDB_DATABASE=identitydb \
+  mongo:7.0
+```
+
+### 2. Démarrer l'API Identity
+```bash
+cd src/MyFITJob.Identity
+dotnet run
+```
+
+L'API Identity sera accessible sur : `http://localhost:5001`
+
+### 3. Tester l'authentification
+
+Utilisez le fichier `test-identity.http` pour tester l'authentification JWT avec Postman ou VS Code.
+
+**Identifiants par défaut :**
+- **Username** : `admin`
+- **Password** : `admin123`
+
+## 📁 Structure du projet
+
+```
+MyFITJob/
+├── src/
+│   ├── MyFITJob.Api/          # API principale (.NET 9)
+│   ├── MyFITJob.Identity/     # Serveur d'identité JWT
+│   ├── MyFITJob.Contacts/     # Service de contacts (Node.js)
+│   └── MyFITJob.Frontend/     # Interface utilisateur (Vue.js)
+├── docs/                      # Documentation
+├── scripts/                   # Scripts utilitaires
+└── test-identity.http         # Tests d'authentification
+```
+
+## 🔧 Technologies utilisées
+
+- **Backend** : .NET 9, ASP.NET Core Identity
+- **Base de données** : PostgreSQL, MongoDB
+- **Frontend** : Vue.js 3
+- **Message Broker** : RabbitMQ
+- **Monitoring** : Prometheus, Grafana
+- **Containerisation** : Docker & Docker Compose
+
+## 🎓 Objectif pédagogique
+
+Ce projet illustre l'architecture microservices avec :
+- Authentification JWT centralisée
+- Communication inter-services via RabbitMQ
+- Monitoring et observabilité
+- Containerisation complète
 
 ## Environnement de travail
 
