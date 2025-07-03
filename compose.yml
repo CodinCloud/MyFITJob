@@ -28,6 +28,7 @@ services:
       - ContactsApi__BaseUrl=http://contacts:3002
       - RabbitMQ__Host=amqp://rabbitmq:5672
       - RabbitMQ__ServiceName=MyFITJob.Api
+      - IdentityServer__Authority=http://identity:8080
     depends_on:
       - db
       - rabbitmq
@@ -76,6 +77,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__MongoDB=mongodb://admin:adminpass@mongodb:27017/identitydb?authSource=admin
       - MongoDbSettings__DatabaseName=identitydb
+    volumes:
+    - identity_keys:/keys 
     depends_on:
       - mongodb
     restart: unless-stopped
@@ -216,3 +219,4 @@ volumes:
   contacts_data: 
   rabbitmq_data:
   mongodb_data:
+  identity_keys:

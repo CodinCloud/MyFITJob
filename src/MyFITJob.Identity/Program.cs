@@ -6,6 +6,8 @@ using MyFITJob.Identity.Infrastructure;
 using MyFITJob.Identity.Seed;
 using MyFITJob.Identity.Settings;
 using System.Text;
+using Duende.IdentityServer.Configuration;
+using Microsoft.AspNetCore.DataProtection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -21,21 +23,8 @@ builder.Services.AddOpenApi();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 
-// Configuration des règles de mot de passe plus souples pour l'apprentissage
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // Règles de mot de passe simplifiées pour les étudiants
-    options.Password.RequireDigit = false;           // Pas besoin de chiffres
-    options.Password.RequireLowercase = false;       // Pas besoin de minuscules
-    options.Password.RequireNonAlphanumeric = false; // Pas besoin de caractères spéciaux
-    options.Password.RequireUppercase = false;       // Pas besoin de majuscules
-    options.Password.RequiredLength = 3;             // Minimum 3 caractères seulement
-    options.Password.RequiredUniqueChars = 0;        // Pas de caractères uniques requis
-
-    // Règles de nom d'utilisateur
-    options.User.RequireUniqueEmail = true;
-    options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-});
+var isSettings = builder.Configuration.GetSection("IdentityServerSettings")
+    .Get<IdentityServerSettings>();
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
     .AddRoles<ApplicationRole>()
@@ -44,47 +33,32 @@ builder.Services.AddDefaultIdentity<ApplicationUser>()
         builder.Configuration.GetSection("MongoDbSettings:DatabaseName").Value!
         );
 
-// JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
-var key = Encoding.UTF8.GetBytes(jwtSettings!.SecretKey);
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddIdentityServer(option =>
     {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(key),
-        ValidateIssuer = true,
-        ValidIssuer = jwtSettings.Issuer,
-        ValidateAudience = true,
-        ValidAudience = jwtSettings.Audience,
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero,
-        // Remapping des claims legacy vers des noms plus modernes
-        NameClaimType = "name",
-        RoleClaimType = "role"
-    };
-    
-    // Configuration des claims pour éviter les URLs XML longues
-    options.MapInboundClaims = false;
-});
+        option.Events.RaiseSuccessEvents = true;
+        option.Events.RaiseFailureEvents = true;
+        option.Events.RaiseErrorEvents = true;
+        
+        // Force issuer if reverse-proxy
+        if (!builder.Configuration.GetValue<bool>("IsLocal"))
+        {
+            option.IssuerUri = "http://localhost";
+        }
+    })
+    .AddAspNetIdentity<ApplicationUser>() // Map l'authentification OIDC pour utiliser notre base utilisateur AspNetUser
+    .AddInMemoryApiScopes(isSettings.ApiScopes)
+    .AddInMemoryApiResources(isSettings.ApiResources)
+    .AddInMemoryClients(isSettings.Clients)
+    .AddInMemoryIdentityResources(isSettings.IdentityResources)
+    .AddDeveloperSigningCredential();
 
-// Services
-builder.Services.AddScoped<JwtTokenGenerator>();
-
-// Controllers
-builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 // API Documentation avec .NET 9 natif
-builder.Services.AddEndpointsApiExplorer();
+// builder.Services.AddEndpointsApiExplorer();
 
 // CORS
+/*
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -94,27 +68,30 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader();
     });
 });
+*/
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
-if (app.Environment.IsDevelopment())
-{
-
-}
-
 app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseCors("AllowAll");
 
-app.UseAuthentication();
+app.UseStaticFiles();
+
+// Pour le HTTP pour les tests docker
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax, // ou None, mais ça ne marchera pas sans HTTPS
+    Secure = CookieSecurePolicy.Always // ou None pour dev, mais ce n'est pas recommandé
+});
+
+app.UseRouting();
+app.UseIdentityServer();
+
 app.UseAuthorization();
 
-app.MapOpenApi();
-app.MapScalarApiReference();
+// app.MapOpenApi();
+// app.MapScalarApiReference();
 
 app.MapControllers();
-
 app.MapRazorPages();
 
 // Seed des données initiales
