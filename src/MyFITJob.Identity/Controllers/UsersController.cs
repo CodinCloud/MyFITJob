@@ -8,7 +8,9 @@ namespace MyFITJob.Identity.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+/*
 [Authorize(Roles = "Admin")]
+*/
 public class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
