@@ -1,35 +1,6 @@
 # MyFITJob - Plateforme de Microservices
 
-## 🚀 Démarrage rapide
-
-### 1. Démarrer MongoDB pour l'Identity Server
-```bash
-docker run -d \
-  --name myfitjob-mongodb \
-  -p 27017:27017 \
-  -e MONGO_INITDB_ROOT_USERNAME=admin \
-  -e MONGO_INITDB_ROOT_PASSWORD=adminpass \
-  -e MONGO_INITDB_DATABASE=identitydb \
-  mongo:7.0
-```
-
-### 2. Démarrer l'API Identity
-```bash
-cd src/MyFITJob.Identity
-dotnet run
-```
-
-L'API Identity sera accessible sur : `http://localhost:5001`
-
-### 3. Tester l'authentification
-
-Utilisez le fichier `test-identity.http` pour tester l'authentification JWT avec Postman ou VS Code.
-
-**Identifiants par défaut :**
-- **Username** : `admin`
-- **Password** : `admin123`
-
-## 📁 Structure du projet
+## � Structure du projet
 
 ```
 MyFITJob/
@@ -43,7 +14,7 @@ MyFITJob/
 └── test-identity.http         # Tests d'authentification
 ```
 
-## 🔧 Technologies utilisées
+## �🔧 Technologies utilisées
 
 - **Backend** : .NET 9, ASP.NET Core Identity
 - **Base de données** : PostgreSQL, MongoDB
