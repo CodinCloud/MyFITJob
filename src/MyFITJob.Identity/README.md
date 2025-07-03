@@ -17,40 +17,39 @@ docker compose up identity -d
 ```
 L'API sera accessible sur : `http://localhost:5001`
 
-#### Option B : Développement local
-```bash
-cd src/MyFITJob.Identity
-dotnet run
-```
-L'API sera accessible sur : `http://localhost:8080`
-
 ### 3. Tester l'authentification
 
-Utilisez le fichier `test-identity.http` pour tester l'authentification JWT.
+> Un utilisateur "admin" est créé au démarrage, lors de la création de la collection `identitydb` dans la base MongoDB
+
+Utilisez le fichier `test-identity.http`, ou l'interface OpenAPI (générée par Scalar) : http://localhost:5001/scalar pour tester l'authentification JWT, .
 
 **Identifiants par défaut :**
 - **Username** : `admin`
 - **Password** : `admin123`
 
-## 📋 Endpoints disponibles
+- Décoder ce token `access_token` via un outil web de décodage (ex: https://jwt.io/) 
 
-- `POST /api/auth/login` - Connexion utilisateur
-- `POST /api/auth/register` - Création de compte
-- `GET /api/auth/me` - Informations utilisateur (protégé)
-- `POST /api/auth/refresh` - Rafraîchissement de token
+- Noter les Claims du token, et pour chaque claims, à quoi elle servent
+
+> Checkpoint 
+
+## 4. Créer un nouvel utilisateur 
+
+- Utiliser l'interface `http://localhost:5001/Identity/Account/Register`
+
+![alt text](image.png)
+
+- Créez un compte de test grace au endpoint de création d'utilisateur 
+*Ex: guest@test.com/Test1234*
+
+- Utiliser la solution de discovery Scalar pour accéder à l'api : `http://localhost:5001/scalar` 
+- Valider la création de l'utilisateur via le /GET 
+- Récupérer un token pour cet utilisateur et le décoder dans `jwt.io`
 
 ## 🔧 Configuration
 
 Les paramètres JWT sont dans `appsettings.json` :
-- **SecretKey** : Clé de signature
+- **SecretKey** : Clé de signature (que l'on peut utiliser pour valider le token coté JWT.io)
 - **Issuer** : MyFITJob.Identity
 - **Audience** : MyFITJob.API
 - **Expiration** : 60 minutes
-
-## 🎓 Objectif pédagogique
-
-Ce service illustre l'authentification JWT dans une architecture microservices avec :
-- ASP.NET Core Identity avec MongoDB
-- Génération et validation de tokens JWT
-- Règles de mot de passe simplifiées pour l'apprentissage
-- Claims JWT modernes et standards 

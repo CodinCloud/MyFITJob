@@ -9,12 +9,15 @@ using System.Text;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuration
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
+
+builder.Services.AddOpenApi();
 
 BsonSerializer.RegisterSerializer(new GuidSerializer(BsonType.String));
 
@@ -75,6 +78,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<JwtTokenGenerator>();
 
 // Controllers
+builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 // API Documentation avec .NET 9 natif
@@ -100,12 +104,18 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapOpenApi();
+app.MapScalarApiReference();
+
 app.MapControllers();
+
+app.MapRazorPages();
 
 // Seed des données initiales
 using (var scope = app.Services.CreateScope())

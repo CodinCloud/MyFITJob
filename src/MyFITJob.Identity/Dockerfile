@@ -8,7 +8,7 @@ RUN dotnet restore "MyFITJob.Identity.csproj"
 
 # Copy everything else and build
 COPY . .
-RUN dotnet build "MyFITJob.Identity.csproj" -c Release -o /app/build
+RUN dotnet build "MyFITJob.Identity.csproj" -c Release -o /app/build -p:OpenApiGenerateDocuments=false
 
 # Development stage
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS dev
