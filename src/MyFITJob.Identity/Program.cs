@@ -6,6 +6,8 @@ using MyFITJob.Identity.Infrastructure;
 using MyFITJob.Identity.Seed;
 using MyFITJob.Identity.Settings;
 using System.Text;
+using Duende.IdentityServer.Configuration;
+using Microsoft.AspNetCore.DataProtection;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
@@ -36,9 +38,16 @@ builder.Services.AddIdentityServer(option =>
         option.Events.RaiseSuccessEvents = true;
         option.Events.RaiseFailureEvents = true;
         option.Events.RaiseErrorEvents = true;
+        
+        // Force issuer if reverse-proxy
+        if (!builder.Configuration.GetValue<bool>("IsLocal"))
+        {
+            option.IssuerUri = "http://localhost";
+        }
     })
     .AddAspNetIdentity<ApplicationUser>() // Map l'authentification OIDC pour utiliser notre base utilisateur AspNetUser
     .AddInMemoryApiScopes(isSettings.ApiScopes)
+    .AddInMemoryApiResources(isSettings.ApiResources)
     .AddInMemoryClients(isSettings.Clients)
     .AddInMemoryIdentityResources(isSettings.IdentityResources)
     .AddDeveloperSigningCredential();

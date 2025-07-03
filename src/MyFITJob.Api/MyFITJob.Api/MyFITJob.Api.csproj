@@ -10,7 +10,9 @@
 
     <ItemGroup>
         <PackageReference Include="Jaeger" Version="1.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.5" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.0.1" />
         <PackageReference Include="OpenTelemetry" Version="1.12.0" />
         <PackageReference Include="OpenTelemetry.Exporter.Jaeger" Version="1.5.1" />
         <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.12.0-beta.1" />
@@ -46,7 +48,6 @@
     
     <ItemGroup>
       <Folder Include="Infrastructure\Configuration\" />
-      <Folder Include="Modules\" />
     </ItemGroup>
 
 </Project>
