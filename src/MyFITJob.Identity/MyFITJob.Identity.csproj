@@ -4,6 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateOpenApiDocuments>false</GenerateOpenApiDocuments>
+    <OpenApiGenerateDocuments>false</OpenApiGenerateDocuments>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,4 +25,13 @@
     <PackageReference Include="Scalar.AspNetCore" Version="2.5.3" />
   </ItemGroup>
 
+  <Target Name="SkipOpenApiDocumentGeneration" BeforeTargets="GenerateOpenApiDocuments">
+    <Message Importance="high" Text="Skipping OpenAPI document generation for Docker build." />
+    <PropertyGroup>
+      <GenerateOpenApiDocuments>false</GenerateOpenApiDocuments>
+    </PropertyGroup>
+    <ItemGroup>
+      <OpenApiDocument Remove="@(OpenApiDocument)" />
+    </ItemGroup>
+  </Target>
 </Project>
