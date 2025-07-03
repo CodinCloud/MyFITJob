@@ -75,6 +75,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<JwtTokenGenerator>();
 
 // Controllers
+builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 
 // API Documentation avec .NET 9 natif
@@ -100,12 +101,15 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorPages();
 
 // Seed des données initiales
 using (var scope = app.Services.CreateScope())
