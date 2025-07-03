@@ -58,5 +58,11 @@ Cliquer sur "Get New Access Token"
 Vous devriez observer le Claim "sub" qui contient l'identifiant de votre utilisateur créé  : 
 ![](2025-07-03-16-32-46.png)
 
+- Enfin, ajouter un scope "profile" dans la liste des scopes demandés : 
+![](2025-07-03-16-38-28.png)
+
+Et demander à nouveau un token : vous devriez avoir accès à de nouvelles propriétés dans le token généré: 
+![](2025-07-03-16-39-14.png)
+
 > Checkpoint
 
