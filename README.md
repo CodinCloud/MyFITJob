@@ -19,14 +19,6 @@ MyFITJob/
 └── package.json               # Scripts de build
 ```
 
-## 🛠️ Technologies utilisées
-
-- **Frontend** : React 19 + Vite + TypeScript
-- **UI Components** : ShadCN/UI + Tailwind CSS
-- **Mock API** : MSW (Mock Service Worker)
-- **CI/CD** : GitHub Actions
-- **Deployment** : Clever Cloud
-
 ## 🚀 Getting Started
 
 ### Prérequis
@@ -34,23 +26,7 @@ MyFITJob/
 - Node.js 18+
 - Git
 - Compte GitHub
-- Compte Clever Cloud (gratuit)
-
-### Installation locale
-
-```bash
-# Cloner le projet
-git clone https://github.com/VOTRE_USERNAME/MyFITJob.git
-cd MyFITJob
-
-# Installer les dépendances
-npm install
-
-# Lancer en mode développement
-npm run dev
-```
-
-L'application sera disponible sur : http://localhost:3000
+- Compte Clever Cloud (gratuit) à créer avec votre adresse `@3il.fr` 
 
 ## 📚 Documentation
 
