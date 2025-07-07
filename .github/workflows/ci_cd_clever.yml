@@ -1,0 +1,69 @@
+name: CI/CD - Deploy to Clever Cloud
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js 18
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: 'src/MyFITJob.Frontend/package-lock.json'
+        
+    - name: Install dependencies
+      run: |
+        cd src/MyFITJob.Frontend
+        npm ci
+        
+    - name: Build application
+      run: |
+        cd src/MyFITJob.Frontend
+        npm run build
+        
+    - name: Install Clever Tools
+      run: npm install -g clever-tools
+      
+    - name: Deploy to Clever Cloud
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      run: |
+        clever login --token ${{ secrets.CLEVER_TOKEN }} --secret ${{ secrets.CLEVER_SECRET }}
+        clever link --app ${{ secrets.CC_APP_ID }}
+        clever deploy --type static
+      env:
+        CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+        CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        
+    - name: Comment PR with deployment URL
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: deployments } = await github.rest.repos.listDeployments({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            ref: context.sha,
+            environment: 'production'
+          });
+          
+          if (deployments.length > 0) {
+            const deployment = deployments[0];
+            const url = `https://${deployment.environment_url}`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `🚀 **Déploiement réussi !**\n\nVotre application est disponible à l'adresse : ${url}\n\n✅ Build terminé avec succès\n✅ Déploiement sur Clever Cloud réussi`
+            });
+          } 

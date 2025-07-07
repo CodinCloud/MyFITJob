@@ -9,6 +9,17 @@ import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+// MSW setup
+import { worker } from './mocks/browser'
+
+// Start MSW in development and production
+worker.start({
+  onUnhandledRequest: 'bypass', // Ignore unhandled requests
+  serviceWorker: {
+    url: '/mockServiceWorker.js',
+  },
+})
+
 export const queryClient = new QueryClient();
 
 // Create a new router instance

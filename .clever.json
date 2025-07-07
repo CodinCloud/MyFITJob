@@ -1,0 +1,8 @@
+{
+  "type": "node",
+  "deploy": {
+    "git": true
+  },
+  "build": "npm run build",
+  "start": "cd src/MyFITJob.Frontend && npx serve -s dist -l 8080"
+} 
