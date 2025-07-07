@@ -21,7 +21,7 @@ COPY --from=build /app/dist /usr/share/nginx/html
 # Copie la config Nginx personnalisée
 COPY src/MyFITJob.Frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]
 
