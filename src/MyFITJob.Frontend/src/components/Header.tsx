@@ -7,7 +7,7 @@ export function Header() {
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-bold">MyFITJob</h1>
-          <Badge variant="secondary">TD CI/CD</Badge>
+          <Badge variant="secondary">TD CI/CD UPDATED</Badge>
         </div>
         
         <div className="flex items-center space-x-4">
