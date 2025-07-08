@@ -45,26 +45,8 @@ jobs:
         CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
         CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         
-    - name: Comment PR with deployment URL
+    - name: Quality Checks
       if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        script: |
-          const { data: deployments } = await github.rest.repos.listDeployments({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            ref: context.sha,
-            environment: 'production'
-          });
-          
-          if (deployments.length > 0) {
-            const deployment = deployments[0];
-            const url = `https://${deployment.environment_url}`;
-            
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: `🚀 **Déploiement réussi !**\n\nVotre application est disponible à l'adresse : ${url}\n\n✅ Build terminé avec succès\n✅ Déploiement sur Clever Cloud réussi`
-            });
-          } 
+      run: |
+        cd src/MyFITJob.Frontend
+        npm run lint
