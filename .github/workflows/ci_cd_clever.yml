@@ -35,18 +35,21 @@ jobs:
     - name: Install Clever Tools
       run: npm install -g clever-tools
       
-    - name: Deploy to Clever Cloud
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-      run: |
-        clever login --token ${{ secrets.CLEVER_TOKEN }} --secret ${{ secrets.CLEVER_SECRET }}
-        clever link --app ${{ secrets.CC_APP_ID }}
-        clever deploy --type static
+    - name: Create review app
+      uses: CleverCloud/clever-cloud-review-app@v2.0.1
       env:
-        CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
         CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        
+        CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        # ORGA_ID: ${{ secrets.ORGA_ID }}
+        GH_CC_RUN_SUCCEEDED_HOOK: ${{ secrets.CC_RUN_SUCCEEDED_HOOK }} # This environment variable will be set on Clever Cloud
+      with:
+        type: 'docker'
+        set-env: true # Enables the command to set en vars on Clever Cloud
+  
     - name: Quality Checks
       if: github.event_name == 'pull_request'
       run: |
         cd src/MyFITJob.Frontend
         npm run lint
+
