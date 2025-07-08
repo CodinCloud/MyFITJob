@@ -1,6 +1,7 @@
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
+import Avatar from 'boring-avatars';
 
+<Avatar name="Maria Mitchell" />;
 export function Header() {
   return (
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -12,11 +13,8 @@ export function Header() {
         
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src="/avatar-placeholder.png" alt="Avatar" />
-              <AvatarFallback>TODO</AvatarFallback>
-            </Avatar>
-            <span className="text-sm font-medium">TODO</span>
+            <Avatar name="JROGER" className="h-8 w-8" />
+            <span className="text-sm font-medium">JROGER</span>
           </div>
         </div>
       </div>
